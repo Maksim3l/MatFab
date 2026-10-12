@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="BuildingDef" format=3]
+
+[ext_resource type="Script" path="res://data/schema/port_def.gd" id="1_qa0kn"]
+[ext_resource type="Script" path="res://data/schema/building_def.gd" id="2_wssu5"]
+
+[resource]
+script = ExtResource("2_wssu5")
+display_name = "Tekoči trak"
+behavior = 1
+duration = 0.25
+keep_selected = true
