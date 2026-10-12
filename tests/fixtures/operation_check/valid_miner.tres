@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="BuildingDef" format=3]
+
+[ext_resource type="Script" path="res://data/schema/port_def.gd" id="1_0tqut"]
+[ext_resource type="Script" path="res://data/schema/building_def.gd" id="2_8erku"]
+
+[sub_resource type="Resource" id="Resource_v6gd1"]
+script = ExtResource("1_0tqut")
+
+[sub_resource type="Resource" id="Resource_rs6yd"]
+script = ExtResource("1_0tqut")
+side = 0
+
+[resource]
+script = ExtResource("2_8erku")
+inputs = Array[ExtResource("1_0tqut")]([SubResource("Resource_v6gd1")])
+outputs = Array[ExtResource("1_0tqut")]([SubResource("Resource_rs6yd")])
+operation = &"mine"
