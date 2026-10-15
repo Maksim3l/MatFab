@@ -10,8 +10,9 @@ config_version=5
 
 [application]
 
-config/name="MatFab"
-config/features=PackedStringArray("4.7", "Mobile")
+config/name="Matfab"
+config/features=PackedStringArray("4.7", "GL Compatibility")
+config/quit_on_go_back=false
 config/icon="res://icon.svg"
 
 [display]
@@ -19,11 +20,19 @@ config/icon="res://icon.svg"
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/gut/plugin.cfg")
+
+[input_devices]
+
+pointing/emulate_touch_from_mouse=true
+
 [physics]
 
 3d/physics_engine="Jolt Physics"
 
 [rendering]
 
-rendering_device/driver.windows="d3d12"
-renderer/rendering_method="mobile"
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
