@@ -27,3 +27,7 @@ func covered_cells() -> Array[Vector2i]:
 
 func front_side() -> int:
 	return Ports.rotate_side(PortDef.Side.UP, rotation)
+
+
+func duration_ticks() -> int:
+	return Simulation.ticks_for(def.duration)
