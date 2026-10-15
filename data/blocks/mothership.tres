@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="BuildingDef" format=3]
+
+[ext_resource type="Script" path="res://data/schema/port_def.gd" id="1_l7whr"]
+[ext_resource type="Script" path="res://data/schema/building_def.gd" id="2_o8opq"]
+
+[resource]
+script = ExtResource("2_o8opq")
+display_name = "Matična ladja"
+symbol = "M"
+behavior = 2
+size = Vector2i(4, 4)
