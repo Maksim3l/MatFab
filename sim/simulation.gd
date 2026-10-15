@@ -1,6 +1,7 @@
 class_name Simulation extends RefCounted
 
 const TICKS_PER_SECOND := 20
+const MOTHERSHIP_ID := &"mothership"
 
 var defs: Dictionary[StringName, BuildingDef]
 var bounds: Rect2i
@@ -16,6 +17,17 @@ func _init(building_defs: Dictionary[StringName, BuildingDef], map_bounds: Rect2
 	defs = building_defs
 	bounds = map_bounds
 	behaviors[BuildingDef.Behavior.PROCESSOR] = ProcessorBehavior.new(self)
+
+
+# Every cell in level data is relative to the mothership, which sits at (0, 0).
+static func from_level(level: LevelDef, building_defs: Dictionary[StringName, BuildingDef]) -> Simulation:
+	var sim := Simulation.new(building_defs, Rect2i(-level.map_size / 2, level.map_size))
+	for patch in level.ore_patches:
+		for y in patch.size.y:
+			for x in patch.size.x:
+				sim.ore[patch.cell + Vector2i(x, y)] = patch.value
+	sim.place(MOTHERSHIP_ID, Vector2i.ZERO, 0)
+	return sim
 
 
 static func ticks_for(seconds: float) -> int:
