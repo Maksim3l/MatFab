@@ -27,3 +27,11 @@ func _init() -> void:
 	controls_sorted.assign(ResourceFolder.load_sorted(CONTROLS_FOLDER))
 	for control in controls_sorted:
 		controls[control.id] = control
+	report_operation_problems()
+
+
+func report_operation_problems() -> void:
+	var defs: Array[BuildingDef] = []
+	defs.assign(buildings.values())
+	for problem in OperationCheck.find_problems(defs):
+		push_error(problem)

@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="BuildingDef" format=3]
+
+[ext_resource type="Script" path="res://data/schema/port_def.gd" id="1_d0qvm"]
+[ext_resource type="Script" path="res://data/schema/building_def.gd" id="2_s2cmw"]
+
+[sub_resource type="Resource" id="Resource_fleer"]
+script = ExtResource("1_d0qvm")
+
+[sub_resource type="Resource" id="Resource_hce1r"]
+script = ExtResource("1_d0qvm")
+cell = Vector2i(1, 0)
+
+[sub_resource type="Resource" id="Resource_dbjyo"]
+script = ExtResource("1_d0qvm")
+side = 0
+
+[resource]
+script = ExtResource("2_s2cmw")
+inputs = Array[ExtResource("1_d0qvm")]([SubResource("Resource_fleer"), SubResource("Resource_hce1r")])
+outputs = Array[ExtResource("1_d0qvm")]([SubResource("Resource_dbjyo")])
+operation = &"mine"
