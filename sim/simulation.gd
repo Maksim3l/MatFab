@@ -8,15 +8,35 @@ var cells: Dictionary[Vector2i, BuildingState] = {}
 var ore: Dictionary[Vector2i, int] = {}
 # Placement order; step() ticks in this order.
 var buildings: Array[BuildingState] = []
+var operations := Operations.new()
+var behaviors: Dictionary[int, Behavior] = {}
 
 
 func _init(building_defs: Dictionary[StringName, BuildingDef], map_bounds: Rect2i) -> void:
 	defs = building_defs
 	bounds = map_bounds
+	behaviors[BuildingDef.Behavior.PROCESSOR] = ProcessorBehavior.new(self)
 
 
 static func ticks_for(seconds: float) -> int:
 	return maxi(1, roundi(seconds * TICKS_PER_SECOND))
+
+
+func step() -> void:
+	for building in buildings.duplicate():
+		var behavior: Behavior = behaviors.get(building.def.behavior)
+		if behavior != null:
+			behavior.tick(building)
+
+
+# The only transfer path: hands `number` from `cell` across `side` to the building there.
+func offer(cell: Vector2i, side: int, number: int) -> bool:
+	var target_cell := cell + Ports.direction(side)
+	var target: BuildingState = cells.get(target_cell)
+	if target == null:
+		return false
+	var behavior: Behavior = behaviors.get(target.def.behavior)
+	return behavior != null and behavior.accept(target, target_cell, Ports.opposite_side(side), number)
 
 
 func building_at(cell: Vector2i) -> BuildingState:
