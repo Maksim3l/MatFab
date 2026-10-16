@@ -2,8 +2,13 @@
 
 [ext_resource type="Script" path="res://debug/debug_play.gd" id="1_debug"]
 [ext_resource type="PackedScene" path="res://view/world_view.tscn" id="2_world"]
+[ext_resource type="PackedScene" path="res://ui/hud.tscn" id="3_hud"]
 
 [node name="DebugPlay" type="Node"]
 script = ExtResource("1_debug")
 
 [node name="WorldView" parent="." instance=ExtResource("2_world")]
+
+[node name="UiLayer" type="CanvasLayer" parent="."]
+
+[node name="Hud" parent="UiLayer" instance=ExtResource("3_hud")]
