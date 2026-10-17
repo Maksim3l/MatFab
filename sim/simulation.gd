@@ -11,12 +11,14 @@ var ore: Dictionary[Vector2i, int] = {}
 var buildings: Array[BuildingState] = []
 var operations := Operations.new()
 var behaviors: Dictionary[int, Behavior] = {}
+var tracker: GoalTracker
 
 
 func _init(building_defs: Dictionary[StringName, BuildingDef], map_bounds: Rect2i) -> void:
 	defs = building_defs
 	bounds = map_bounds
 	behaviors[BuildingDef.Behavior.PROCESSOR] = ProcessorBehavior.new(self)
+	behaviors[BuildingDef.Behavior.MOTHERSHIP] = MothershipBehavior.new(self)
 
 
 # Every cell in level data is relative to the mothership, which sits at (0, 0).
@@ -27,6 +29,7 @@ static func from_level(level: LevelDef, building_defs: Dictionary[StringName, Bu
 			for x in patch.size.x:
 				sim.ore[patch.cell + Vector2i(x, y)] = patch.value
 	sim.place(MOTHERSHIP_ID, Vector2i.ZERO, 0)
+	sim.tracker = GoalTracker.new(level.goals)
 	return sim
 
 
