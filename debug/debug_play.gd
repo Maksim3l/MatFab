@@ -10,9 +10,11 @@ var clock := SimClock.new()
 
 
 func _ready() -> void:
-	sim = Simulation.from_level(Registry.levels[LEVEL_ID], Registry.buildings)
-	world_view.show_sim(sim, clock)
+	var level: LevelDef = Registry.levels[LEVEL_ID]
+	sim = Simulation.from_level(level, Registry.buildings)
+	world_view.show_sim(sim, clock, level.buildable)
 	hud.show_goals(sim.tracker)
+	hud.show_toolbar(world_view.build_tool)
 
 
 func _process(delta: float) -> void:
