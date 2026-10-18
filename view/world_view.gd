@@ -5,6 +5,7 @@ var clock: SimClock
 
 @onready var ground_view: GroundView = $GroundView
 @onready var building_view: BuildingView = $BuildingView
+@onready var item_view: ItemView = $ItemView
 @onready var camera_rig: CameraRig = $CameraRig
 
 
@@ -13,6 +14,7 @@ func show_sim(simulation: Simulation, sim_clock: SimClock) -> void:
 	clock = sim_clock
 	ground_view.show_sim(sim)
 	building_view.show_sim(sim)
+	item_view.show_sim(sim, clock)
 	center_camera()
 
 
