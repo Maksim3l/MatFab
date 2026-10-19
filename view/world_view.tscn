@@ -27,8 +27,9 @@ script = ExtResource("7_ghost")
 [node name="CameraRig" type="Camera2D" parent="."]
 script = ExtResource("4_camera")
 
-[node name="BuildTool" type="Node" parent="."]
+[node name="BuildTool" type="Node" parent="." node_paths=PackedStringArray("camera_rig")]
 script = ExtResource("8_tool")
+camera_rig = NodePath("../CameraRig")
 
 [node name="TouchGestures" type="Node" parent="." node_paths=PackedStringArray("camera_rig", "build_tool")]
 script = ExtResource("5_touch")

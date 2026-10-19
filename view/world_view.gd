@@ -19,9 +19,4 @@ func show_sim(simulation: Simulation, sim_clock: SimClock, buildable: Array[Buil
 	item_view.show_sim(sim, clock)
 	build_tool.show_sim(sim, buildable)
 	ghost_view.show_tool(build_tool)
-	center_camera()
-
-
-func center_camera() -> void:
-	var mothership := sim.building_at(Vector2i.ZERO)
-	camera_rig.center_on(Grid.cells_rect(mothership.origin, mothership.size()).get_center())
+	build_tool.center_camera()
