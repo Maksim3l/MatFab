@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Matfab"
-run/main_scene="res://debug/debug_play.tscn"
+run/main_scene="res://ui/main_menu.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/quit_on_go_back=false
 config/icon="res://icon.svg"
@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 [autoload]
 
 Registry="*res://game/registry.gd"
+Game="*res://game/game.gd"
 
 [display]
 
