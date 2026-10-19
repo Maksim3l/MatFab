@@ -4,6 +4,7 @@
 [ext_resource type="Resource" path="res://data/blocks/conveyor.tres" id="2_pmnq8"]
 [ext_resource type="Resource" path="res://data/blocks/miner.tres" id="3_03sb0"]
 [ext_resource type="Script" path="res://data/schema/ore_patch.gd" id="4_2y85k"]
+[ext_resource type="Resource" path="res://data/blocks/sum.tres" id="4_pmnq8"]
 [ext_resource type="Script" path="res://data/schema/level_def.gd" id="5_2s3mb"]
 
 [sub_resource type="Resource" id="Resource_g7x37"]
@@ -26,4 +27,4 @@ goals = Dictionary[int, int]({
 5: 10,
 6: 10
 })
-buildable = Array[ExtResource("1_8lqhm")]([ExtResource("2_pmnq8"), ExtResource("3_03sb0")])
+buildable = Array[ExtResource("1_8lqhm")]([ExtResource("2_pmnq8"), ExtResource("3_03sb0"), ExtResource("4_pmnq8")])
