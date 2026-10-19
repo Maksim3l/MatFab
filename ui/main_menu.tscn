@@ -1,0 +1,83 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://ui/main_menu.gd" id="1_menu"]
+[ext_resource type="Theme" path="res://ui/menu_theme.tres" id="2_theme"]
+[ext_resource type="Texture2D" path="res://assets/real/background.png" id="3_bg"]
+[ext_resource type="Script" path="res://ui/menu_belt.gd" id="4_belt"]
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_menu")
+
+[node name="Background" type="TextureRect" parent="."]
+texture_filter = 1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(4, 4)
+texture = ExtResource("3_bg")
+stretch_mode = 1
+
+[node name="Belt" type="Control" parent="."]
+texture_filter = 1
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -200.0
+grow_horizontal = 2
+grow_vertical = 0
+script = ExtResource("4_belt")
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = -96.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Column" type="VBoxContainer" parent="Center"]
+layout_mode = 2
+theme_override_constants/separation = 28
+
+[node name="Title" type="Label" parent="Center/Column"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/outline_size = 24
+theme_override_font_sizes/font_size = 120
+text = "Matfab"
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="Center/Column"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+
+[node name="ContinueButton" type="Button" parent="Center/Column"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(520, 100)
+layout_mode = 2
+text = "Nadaljuj"
+
+[node name="PlayButton" type="Button" parent="Center/Column"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(520, 100)
+layout_mode = 2
+text = "Igraj"
+
+[node name="SettingsButton" type="Button" parent="Center/Column"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(520, 100)
+layout_mode = 2
+text = "Nastavitve"
