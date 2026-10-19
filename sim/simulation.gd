@@ -12,6 +12,9 @@ var buildings: Array[BuildingState] = []
 var operations := Operations.new()
 var behaviors: Dictionary[int, Behavior] = {}
 var tracker: GoalTracker
+var stepping := false
+# Buildings already ticked in the running step.
+var ticked: Dictionary[BuildingState, bool] = {}
 
 
 func _init(building_defs: Dictionary[StringName, BuildingDef], map_bounds: Rect2i) -> void:
@@ -19,6 +22,7 @@ func _init(building_defs: Dictionary[StringName, BuildingDef], map_bounds: Rect2
 	bounds = map_bounds
 	behaviors[BuildingDef.Behavior.PROCESSOR] = ProcessorBehavior.new(self)
 	behaviors[BuildingDef.Behavior.MOTHERSHIP] = MothershipBehavior.new(self)
+	behaviors[BuildingDef.Behavior.CONVEYOR] = ConveyorBehavior.new(self)
 
 
 # Every cell in level data is relative to the mothership, which sits at (0, 0).
@@ -38,10 +42,20 @@ static func ticks_for(seconds: float) -> int:
 
 
 func step() -> void:
+	stepping = true
 	for building in buildings.duplicate():
 		var behavior: Behavior = behaviors.get(building.def.behavior)
 		if behavior != null:
 			behavior.tick(building)
+		ticked[building] = true
+	ticked.clear()
+	stepping = false
+
+
+# Timer for a number handed over now. A building that still ticks later in this step starts one lower,
+# so a number spends the same number of steps on it whichever order the buildings were placed in.
+func arrival_timer(building: BuildingState) -> int:
+	return -1 if stepping and not ticked.has(building) else 0
 
 
 # The only transfer path: hands `number` from `cell` across `side` to the building there.

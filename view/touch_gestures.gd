@@ -3,10 +3,13 @@ class_name TouchGestures extends Node
 const WHEEL_ZOOM_STEP := 1.1
 
 @export var camera_rig: CameraRig
+@export var build_tool: BuildTool
 
 var touches: Dictionary[int, Vector2] = {}
 var pinch_start_distance := 0.0
 var pinch_start_zoom := 1.0
+# Set when a second finger cancels the first finger's ghosts; nothing places until every finger lifts.
+var gesture_cancelled := false
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -18,13 +21,25 @@ func _unhandled_input(event: InputEvent) -> void:
 		handle_wheel(event)
 
 
+func cell_at(screen_point: Vector2) -> Vector2i:
+	return Grid.world_to_cell(camera_rig.screen_to_world(screen_point))
+
+
 func handle_touch(event: InputEventScreenTouch) -> void:
 	if event.pressed:
 		touches[event.index] = event.position
+		if touches.size() == 1:
+			build_tool.press(cell_at(event.position))
+		elif touches.size() == 2:
+			build_tool.cancel_gesture()
+			gesture_cancelled = true
+			begin_pinch()
 	else:
 		touches.erase(event.index)
-	if touches.size() == 2:
-		begin_pinch()
+		if touches.is_empty():
+			if not gesture_cancelled:
+				build_tool.release()
+			gesture_cancelled = false
 	get_viewport().set_input_as_handled()
 
 
@@ -32,10 +47,12 @@ func handle_drag(event: InputEventScreenDrag) -> void:
 	if not touches.has(event.index):
 		return
 	touches[event.index] = event.position
-	if touches.size() == 1:
-		camera_rig.pan_by_screen(event.relative)
-	elif touches.size() == 2:
+	if touches.size() == 2:
 		pan_and_pinch(event.relative)
+	elif build_tool.gesture_active:
+		build_tool.drag_to(cell_at(event.position))
+	else:
+		camera_rig.pan_by_screen(event.relative)
 	get_viewport().set_input_as_handled()
 
 

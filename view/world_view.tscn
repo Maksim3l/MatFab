@@ -5,6 +5,9 @@
 [ext_resource type="Script" path="res://view/building_view.gd" id="3_building"]
 [ext_resource type="Script" path="res://view/camera_rig.gd" id="4_camera"]
 [ext_resource type="Script" path="res://view/touch_gestures.gd" id="5_touch"]
+[ext_resource type="Script" path="res://view/item_view.gd" id="6_item"]
+[ext_resource type="Script" path="res://view/ghost_view.gd" id="7_ghost"]
+[ext_resource type="Script" path="res://view/build_tool.gd" id="8_tool"]
 
 [node name="WorldView" type="Node2D"]
 script = ExtResource("1_world")
@@ -15,9 +18,19 @@ script = ExtResource("2_ground")
 [node name="BuildingView" type="Node2D" parent="."]
 script = ExtResource("3_building")
 
+[node name="ItemView" type="Node2D" parent="."]
+script = ExtResource("6_item")
+
+[node name="GhostView" type="Node2D" parent="."]
+script = ExtResource("7_ghost")
+
 [node name="CameraRig" type="Camera2D" parent="."]
 script = ExtResource("4_camera")
 
-[node name="TouchGestures" type="Node" parent="." node_paths=PackedStringArray("camera_rig")]
+[node name="BuildTool" type="Node" parent="."]
+script = ExtResource("8_tool")
+
+[node name="TouchGestures" type="Node" parent="." node_paths=PackedStringArray("camera_rig", "build_tool")]
 script = ExtResource("5_touch")
 camera_rig = NodePath("../CameraRig")
+build_tool = NodePath("../BuildTool")
