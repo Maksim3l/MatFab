@@ -11,7 +11,7 @@ func test_registry_loads_the_first_level() -> void:
 	var level: LevelDef = Registry.levels[&"r1_01"]
 	assert_eq(level.title, "Prvi koraki")
 	assert_eq(level.goals, {2: 10, 3: 10, 4: 10, 5: 10, 6: 10} as Dictionary[int, int])
-	assert_eq(level.buildable, [Registry.buildings[&"conveyor"], Registry.buildings[&"miner"]] as Array[BuildingDef])
+	assert_eq(level.buildable, [Registry.buildings[&"conveyor"], Registry.buildings[&"miner"], Registry.buildings[&"sum"]] as Array[BuildingDef])
 
 
 func test_core_blocks_pass_the_operation_check() -> void:
