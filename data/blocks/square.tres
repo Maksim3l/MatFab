@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="BuildingDef" format=3 uid="uid://dmaorxdj7i7el"]
+
+[ext_resource type="Script" uid="uid://b1pclrmumcx47" path="res://data/schema/port_def.gd" id="1_3sbdj"]
+[ext_resource type="Script" uid="uid://c1gppjsjj1ahr" path="res://data/schema/building_def.gd" id="2_vk1u4"]
+
+[sub_resource type="Resource" id="Resource_lloll"]
+script = ExtResource("1_3sbdj")
+
+[sub_resource type="Resource" id="Resource_kufgm"]
+script = ExtResource("1_3sbdj")
+side = 0
+
+[resource]
+script = ExtResource("2_vk1u4")
+display_name = "Kvadrat"
+symbol = "a²"
+inputs = Array[ExtResource("1_3sbdj")]([SubResource("Resource_lloll")])
+outputs = Array[ExtResource("1_3sbdj")]([SubResource("Resource_kufgm")])
+operation = &"square"

@@ -23,3 +23,11 @@ func divide(a: int, b: int) -> Variant:
 		return null
 	@warning_ignore("integer_division")
 	return a / b
+
+
+func square(a: int) -> int:
+	return a * a
+
+
+func cube(a: int) -> int:
+	return a * a * a
