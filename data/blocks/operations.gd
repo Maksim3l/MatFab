@@ -16,3 +16,10 @@ func subtract(a: int, b: int) -> Variant:
 
 func multiply(a: int, b: int) -> int:
 	return a * b
+
+
+func divide(a: int, b: int) -> Variant:
+	if b == 0 or a % b != 0:
+		return null
+	@warning_ignore("integer_division")
+	return a / b
