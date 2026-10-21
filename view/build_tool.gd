@@ -92,6 +92,15 @@ func center_camera() -> void:
 	state_changed.emit()
 
 
+func pipette_at(cell: Vector2i) -> void:
+	var picked := Pipette.pick(sim, cell, buildable)
+	if picked == null:
+		return
+	if picked.rotation != Pipette.KEEP_ROTATION:
+		rotations[picked.def_id] = picked.rotation
+	select_def(sim.defs[picked.def_id])
+
+
 func tool_rotation() -> int:
 	return rotations.get(tool_def.id, 0)
 
