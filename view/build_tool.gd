@@ -12,6 +12,9 @@ var rotations: Dictionary[StringName, int] = {}
 var gesture_active := false
 var drag_cells: Array[Vector2i] = []
 var ghosts: Array[Placement] = []
+var keep_placing := false
+var straight_line := false
+var conveyors_flipped := false
 
 
 func show_sim(simulation: Simulation, buildable_defs: Array[BuildingDef]) -> void:
@@ -123,7 +126,7 @@ func release() -> void:
 	if ghosts.size() > 0:
 		rotations[tool_def.id] = ghosts.back().rotation
 	cancel_gesture()
-	if not tool_def.keep_selected:
+	if not (keep_placing or tool_def.keep_selected):
 		drop_tool()
 
 
@@ -154,14 +157,19 @@ func cancel_gesture() -> void:
 
 
 func refresh_ghosts() -> void:
-	ghosts = placements_for(drag_cells)
+	ghosts = placements_for(DragPath.lock_to_axis(drag_cells) if straight_line else drag_cells)
 
 
 func placements_for(cells: Array[Vector2i]) -> Array[Placement]:
 	if is_conveyor_tool():
-		return DragPath.conveyor_placements(tool_def.id, cells, tool_rotation(), false)
-	var single: Array[Placement] = [Placement.new(tool_def.id, origin_under(cells[0], tool_rotation()), tool_rotation())]
-	return single
+		return DragPath.conveyor_placements(tool_def.id, cells, tool_rotation(), conveyors_flipped)
+	var origins: Array[Vector2i] = []
+	for cell in cells:
+		origins.append(origin_under(cell, tool_rotation()))
+	var placements: Array[Placement] = []
+	for origin in DragPath.stepped_origins(origins, Ports.rotated_size(tool_def.size, tool_rotation())):
+		placements.append(Placement.new(tool_def.id, origin, tool_rotation()))
+	return placements
 
 
 # Origin that puts the block's middle cell under the finger.
@@ -173,6 +181,7 @@ func ghost_fits(ghost: Placement) -> bool:
 	return sim.can_place(ghost.def_id, ghost.origin, ghost.rotation)
 
 
+# Placements that do not fit are skipped, so a miner dragged across an ore patch fills only the ore.
 func commit(placements: Array[Placement]) -> void:
 	for placement in placements:
 		sim.place(placement.def_id, placement.origin, placement.rotation)
