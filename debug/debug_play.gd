@@ -7,6 +7,7 @@ var clock := SimClock.new()
 
 @onready var world_view: WorldView = $WorldView
 @onready var hud: Hud = $UiLayer/Hud
+@onready var action_bar: ActionBar = $UiLayer/ActionBar
 
 
 func _ready() -> void:
@@ -15,6 +16,7 @@ func _ready() -> void:
 	world_view.show_sim(sim, clock, level.buildable)
 	hud.show_goals(sim.tracker)
 	hud.show_toolbar(world_view.build_tool)
+	action_bar.show_tool(world_view.build_tool, Registry.controls_sorted)
 
 
 func _process(delta: float) -> void:
