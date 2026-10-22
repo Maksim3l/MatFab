@@ -15,11 +15,13 @@ var ghosts: Array[Placement] = []
 var keep_placing := false
 var straight_line := false
 var conveyors_flipped := false
+var history := EditHistory.new()
 
 
 func show_sim(simulation: Simulation, buildable_defs: Array[BuildingDef]) -> void:
 	sim = simulation
 	buildable = buildable_defs
+	history = EditHistory.new()
 	drop_tool()
 
 
@@ -147,15 +149,31 @@ func is_same_def_building(cell: Vector2i) -> bool:
 # A tap on a building of the tool's def turns it a quarter clockwise in place, when the turned block fits.
 func rotate_building(cell: Vector2i) -> void:
 	var building := sim.building_at(cell)
-	var turned := posmod(building.rotation + 1, 4)
-	if building.def.behavior == BuildingDef.Behavior.CONVEYOR:
-		sim.place(building.def.id, building.origin, turned)
-	else:
+	var before := placement_of(building)
+	var turned := Placement.new(before.def_id, before.origin, posmod(before.rotation + 1, 4))
+	if building.def.behavior != BuildingDef.Behavior.CONVEYOR:
 		sim.remove(cell)
-		if not sim.place(building.def.id, building.origin, turned):
-			sim.place(building.def.id, building.origin, building.rotation)
-			return
-	rotations[building.def.id] = turned
+	if not sim.place(turned.def_id, turned.origin, turned.rotation):
+		sim.place(before.def_id, before.origin, before.rotation)
+		return
+	history.record([turned] as Array[Placement], [before] as Array[Placement])
+	rotations[turned.def_id] = turned.rotation
+	state_changed.emit()
+
+
+static func placement_of(building: BuildingState) -> Placement:
+	return Placement.new(building.def.id, building.origin, building.rotation)
+
+
+func undo() -> void:
+	cancel_gesture()
+	history.undo(sim)
+	state_changed.emit()
+
+
+func redo() -> void:
+	cancel_gesture()
+	history.redo(sim)
 	state_changed.emit()
 
 
@@ -191,6 +209,25 @@ func ghost_fits(ghost: Placement) -> bool:
 
 
 # Placements that do not fit are skipped, so a miner dragged across an ore patch fills only the ore.
+# The whole gesture is one undo step; a conveyor it replaced counts as removed.
 func commit(placements: Array[Placement]) -> void:
+	var added: Array[Placement] = []
+	var removed: Array[Placement] = []
 	for placement in placements:
-		sim.place(placement.def_id, placement.origin, placement.rotation)
+		var existing := sim.building_at(placement.origin)
+		var replaced := existing != null and sim.replaces(sim.defs[placement.def_id], existing)
+		var before := placement_of(existing) if replaced else null
+		if sim.place(placement.def_id, placement.origin, placement.rotation):
+			if before != null:
+				forget_or_remove(before, added, removed)
+			added.append(placement)
+	history.record(added, removed)
+
+
+# A building this same gesture added and then replaced was never there before the gesture.
+static func forget_or_remove(before: Placement, added: Array[Placement], removed: Array[Placement]) -> void:
+	for i in added.size():
+		if added[i].equals(before):
+			added.remove_at(i)
+			return
+	removed.append(before)
