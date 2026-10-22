@@ -40,3 +40,26 @@ func test_a_turn_makes_a_corner() -> void:
 func test_a_single_cell_keeps_the_tool_rotation() -> void:
 	var cells: Array[Vector2i] = [Vector2i(4, 4)]
 	assert_eq(rotations_of(DragPath.conveyor_placements(&"conveyor", cells, LEFT, false)), [LEFT] as Array[int])
+
+
+func test_flipped_conveyors_face_the_previous_cell() -> void:
+	var cells: Array[Vector2i] = [Vector2i(0, 0), Vector2i(1, 0), Vector2i(1, 1)]
+	var placements := DragPath.conveyor_placements(&"conveyor", cells, UP, true)
+	assert_eq(rotations_of(placements), [LEFT, LEFT, UP] as Array[int])
+	assert_eq(placements[0].origin, Vector2i(0, 0))
+
+
+func test_axis_lock_keeps_the_axis_of_the_first_step() -> void:
+	var cells: Array[Vector2i] = [Vector2i(0, 0), Vector2i(1, 0), Vector2i(1, 1), Vector2i(2, 1), Vector2i(3, 2)]
+	assert_eq(DragPath.lock_to_axis(cells), [Vector2i(0, 0), Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0)] as Array[Vector2i])
+
+
+func test_axis_lock_on_a_vertical_drag() -> void:
+	var cells: Array[Vector2i] = [Vector2i(0, 0), Vector2i(0, 1), Vector2i(1, 1), Vector2i(1, 2)]
+	assert_eq(DragPath.lock_to_axis(cells), [Vector2i(0, 0), Vector2i(0, 1), Vector2i(0, 2)] as Array[Vector2i])
+
+
+func test_stepped_origins_place_one_copy_per_size_step() -> void:
+	var origins: Array[Vector2i] = [Vector2i(0, 0), Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0), Vector2i(4, 0)]
+	assert_eq(DragPath.stepped_origins(origins, Vector2i(2, 1)), [Vector2i(0, 0), Vector2i(2, 0), Vector2i(4, 0)] as Array[Vector2i])
+	assert_eq(DragPath.stepped_origins(origins, Vector2i(1, 1)).size(), 5)

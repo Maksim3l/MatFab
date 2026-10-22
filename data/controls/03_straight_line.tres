@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="ActionButtonDef" format=3]
+
+[ext_resource type="Script" path="res://data/schema/action_button_def.gd" id="1_kp7tn"]
+
+[resource]
+script = ExtResource("1_kp7tn")
+label = "Ravna črta"
+shown_with = Array[int]([1])
+toggles_property = &"straight_line"

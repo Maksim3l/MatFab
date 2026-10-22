@@ -88,3 +88,38 @@ func test_contexts_follow_the_tool() -> void:
 	tool.select_def(Registry.buildings[&"miner"])
 	assert_false(tool.active_contexts().has(ActionButtonDef.Context.CONVEYOR_TOOL))
 	assert_true(tool.active_contexts().has(ActionButtonDef.Context.BUILDING_TOOL))
+
+
+func test_miner_drag_across_an_ore_patch_fills_only_the_ore() -> void:
+	tool.select_def(Registry.buildings[&"miner"])
+	tool.press(Vector2i(4, 4))
+	tool.drag_to(Vector2i(10, 4))
+	tool.release()
+	var miners := 0
+	for building in sim.buildings:
+		if building.def.id == &"miner":
+			miners += 1
+	assert_eq(miners, 3)
+
+
+func test_tool_drops_after_placing_unless_keep_placing() -> void:
+	tool.keep_placing = true
+	tool.select_def(Registry.buildings[&"miner"])
+	tool.press(Vector2i(6, 3))
+	tool.release()
+	assert_true(tool.has_tool())
+	tool.keep_placing = false
+	tool.press(Vector2i(7, 3))
+	tool.release()
+	assert_false(tool.has_tool())
+
+
+func test_straight_line_keeps_a_conveyor_drag_on_one_row() -> void:
+	tool.straight_line = true
+	tool.select_def(Registry.buildings[&"conveyor"])
+	tool.press(Vector2i(-6, 5))
+	tool.drag_to(Vector2i(-5, 5))
+	tool.drag_to(Vector2i(-3, 7))
+	tool.release()
+	assert_not_null(sim.building_at(Vector2i(-3, 5)))
+	assert_null(sim.building_at(Vector2i(-3, 7)))
