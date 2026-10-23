@@ -2,6 +2,8 @@ class_name BuildTool extends Node
 
 signal state_changed
 
+enum Mode { NONE, BUILD, ERASE }
+
 @export var camera_rig: CameraRig
 
 var sim: Simulation
@@ -16,6 +18,9 @@ var keep_placing := false
 var straight_line := false
 var conveyors_flipped := false
 var history := EditHistory.new()
+var mode := Mode.NONE
+# Buildings the eraser path has passed over; release removes them.
+var erase_marks: Array[BuildingState] = []
 
 
 func show_sim(simulation: Simulation, buildable_defs: Array[BuildingDef]) -> void:
@@ -32,12 +37,21 @@ func has_tool() -> bool:
 func select_def(def: BuildingDef) -> void:
 	cancel_gesture()
 	tool_def = def
+	mode = Mode.BUILD
 	state_changed.emit()
 
 
 func drop_tool() -> void:
 	cancel_gesture()
 	tool_def = null
+	mode = Mode.NONE
+	state_changed.emit()
+
+
+func use_eraser() -> void:
+	cancel_gesture()
+	tool_def = null
+	mode = Mode.ERASE
 	state_changed.emit()
 
 
@@ -112,7 +126,7 @@ func is_conveyor_tool() -> bool:
 
 
 func press(cell: Vector2i) -> void:
-	if not has_tool():
+	if mode == Mode.NONE:
 		return
 	gesture_active = true
 	drag_cells = [cell]
@@ -128,6 +142,10 @@ func drag_to(cell: Vector2i) -> void:
 
 func release() -> void:
 	if not gesture_active:
+		return
+	if mode == Mode.ERASE:
+		erase_marked()
+		cancel_gesture()
 		return
 	if drag_cells.size() == 1 and is_same_def_building(drag_cells[0]):
 		rotate_building(drag_cells[0])
@@ -181,9 +199,13 @@ func cancel_gesture() -> void:
 	gesture_active = false
 	drag_cells.clear()
 	ghosts.clear()
+	erase_marks.clear()
 
 
 func refresh_ghosts() -> void:
+	if mode == Mode.ERASE:
+		erase_marks = buildings_under(drag_cells)
+		return
 	ghosts = placements_for(DragPath.lock_to_axis(drag_cells) if straight_line else drag_cells)
 
 
@@ -222,6 +244,25 @@ func commit(placements: Array[Placement]) -> void:
 				forget_or_remove(before, added, removed)
 			added.append(placement)
 	history.record(added, removed)
+
+
+# Every building under the cells, once each, the mothership excepted.
+func buildings_under(cells: Array[Vector2i]) -> Array[BuildingState]:
+	var found: Array[BuildingState] = []
+	for cell in cells:
+		var building := sim.building_at(cell)
+		if building != null and building.def.behavior != BuildingDef.Behavior.MOTHERSHIP and not found.has(building):
+			found.append(building)
+	return found
+
+
+# Removing the marked buildings is one undo step.
+func erase_marked() -> void:
+	var removed: Array[Placement] = []
+	for building in erase_marks:
+		if sim.remove(building.origin):
+			removed.append(placement_of(building))
+	history.record([] as Array[Placement], removed)
 
 
 # A building this same gesture added and then replaced was never there before the gesture.
