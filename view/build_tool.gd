@@ -2,7 +2,7 @@ class_name BuildTool extends Node
 
 signal state_changed
 
-enum Mode { NONE, BUILD, ERASE }
+enum Mode { NONE, BUILD, ERASE, SELECT }
 
 @export var camera_rig: CameraRig
 
@@ -21,6 +21,9 @@ var history := EditHistory.new()
 var mode := Mode.NONE
 # Buildings the eraser path has passed over; release removes them.
 var erase_marks: Array[BuildingState] = []
+# Cells of the current selection; a zero size means nothing is selected.
+var selection := Rect2i()
+var clipboard: Blueprint
 
 
 func show_sim(simulation: Simulation, buildable_defs: Array[BuildingDef]) -> void:
@@ -46,6 +49,51 @@ func drop_tool() -> void:
 	tool_def = null
 	mode = Mode.NONE
 	state_changed.emit()
+
+
+func use_selector() -> void:
+	cancel_gesture()
+	tool_def = null
+	mode = Mode.SELECT
+	state_changed.emit()
+
+
+func has_selection() -> bool:
+	return selection.has_area()
+
+
+func clear_selection() -> void:
+	selection = Rect2i()
+	state_changed.emit()
+
+
+func selected_buildings() -> Array[BuildingState]:
+	var cells: Array[Vector2i] = []
+	for y in range(selection.position.y, selection.end.y):
+		for x in range(selection.position.x, selection.end.x):
+			cells.append(Vector2i(x, y))
+	return buildings_under(cells)
+
+
+func delete_selection() -> void:
+	erase_marks = selected_buildings()
+	erase_marked()
+	erase_marks.clear()
+	clear_selection()
+
+
+func copy() -> void:
+	if not has_selection():
+		return
+	var captured := Blueprint.capture(sim, selection)
+	if not captured.is_empty():
+		clipboard = captured
+	state_changed.emit()
+
+
+func cut() -> void:
+	copy()
+	delete_selection()
 
 
 func use_eraser() -> void:
@@ -82,6 +130,8 @@ func active_contexts() -> Array[ActionButtonDef.Context]:
 		contexts.append(ActionButtonDef.Context.BUILDING_TOOL)
 	if is_conveyor_tool():
 		contexts.append(ActionButtonDef.Context.CONVEYOR_TOOL)
+	if has_selection():
+		contexts.append(ActionButtonDef.Context.SELECTION)
 	return contexts
 
 
@@ -147,6 +197,10 @@ func release() -> void:
 		erase_marked()
 		cancel_gesture()
 		return
+	if mode == Mode.SELECT:
+		cancel_gesture()
+		state_changed.emit()
+		return
 	if drag_cells.size() == 1 and is_same_def_building(drag_cells[0]):
 		rotate_building(drag_cells[0])
 		cancel_gesture()
@@ -205,6 +259,10 @@ func cancel_gesture() -> void:
 func refresh_ghosts() -> void:
 	if mode == Mode.ERASE:
 		erase_marks = buildings_under(drag_cells)
+		return
+	if mode == Mode.SELECT:
+		selection = Rect2i(drag_cells[0], Vector2i.ZERO).expand(drag_cells.back())
+		selection.size += Vector2i.ONE
 		return
 	ghosts = placements_for(DragPath.lock_to_axis(drag_cells) if straight_line else drag_cells)
 
