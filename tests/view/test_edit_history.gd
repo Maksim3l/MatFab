@@ -89,3 +89,30 @@ func test_a_new_gesture_clears_redo() -> void:
 	tool.undo()
 	tap(&"miner", Vector2i(7, 3))
 	assert_false(tool.history.can_redo())
+
+
+func test_eraser_removes_buildings_along_the_path_as_one_gesture() -> void:
+	var empty := layout()
+	drag(&"conveyor", [Vector2i(-6, 5), Vector2i(-1, 5)] as Array[Vector2i])
+	tap(&"miner", Vector2i(6, 3))
+	var built := layout()
+	tool.use_eraser()
+	tool.press(Vector2i(-5, 5))
+	tool.drag_to(Vector2i(-3, 5))
+	assert_eq(tool.erase_marks.size(), 3)
+	assert_eq(sim.buildings.size(), 8, "nothing is removed before release")
+	tool.release()
+	assert_eq(sim.buildings.size(), 5)
+	tool.undo()
+	assert_eq(layout(), built)
+	tool.undo()
+	tool.undo()
+	assert_eq(layout(), empty)
+
+
+func test_eraser_leaves_the_mothership() -> void:
+	tool.use_eraser()
+	tool.press(Vector2i(1, 1))
+	tool.drag_to(Vector2i(2, 1))
+	tool.release()
+	assert_not_null(sim.building_at(Vector2i(1, 1)))

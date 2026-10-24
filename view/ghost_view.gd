@@ -2,6 +2,7 @@ class_name GhostView extends BuildingView
 
 const GHOST_ALPHA := 0.6
 const BLOCKED_TINT := Color(1.0, 0.35, 0.35)
+const ERASE_COLOR := Color(1.0, 0.2, 0.2, 0.45)
 
 var build_tool: BuildTool
 
@@ -13,6 +14,8 @@ func show_tool(tool: BuildTool) -> void:
 func _draw() -> void:
 	if build_tool == null:
 		return
+	for building in build_tool.erase_marks:
+		draw_rect(Grid.cells_rect(building.origin, building.size()), ERASE_COLOR)
 	var ghosts := build_tool.ghosts
 	for i in ghosts.size():
 		var ghost := ghosts[i]
