@@ -1,0 +1,39 @@
+[gd_resource type="Resource" script_class="LevelDef" format=3]
+
+[ext_resource type="Script" uid="uid://c1gppjsjj1ahr" path="res://data/schema/building_def.gd" id="1_s47mu"]
+[ext_resource type="Resource" path="res://data/blocks/conveyor.tres" id="2_k8xwd"]
+[ext_resource type="Resource" path="res://data/blocks/miner.tres" id="3_j5c6i"]
+[ext_resource type="Resource" path="res://data/blocks/square.tres" id="4_square"]
+[ext_resource type="Script" uid="uid://dnrm7gq8lwchd" path="res://data/schema/ore_patch.gd" id="5_uw04x"]
+[ext_resource type="Script" uid="uid://cncfnd32ethkw" path="res://data/schema/level_def.gd" id="6_f73iy"]
+[ext_resource type="Resource" path="res://data/blocks/cube.tres" id="7_cube"]
+[ext_resource type="Resource" path="res://data/blocks/multiply.tres" id="8_multiply"]
+
+[sub_resource type="Resource" id="Resource_g7x37"]
+script = ExtResource("5_uw04x")
+value = 2
+cell = Vector2i(-10, -6)
+
+[sub_resource type="Resource" id="Resource_70sox"]
+script = ExtResource("5_uw04x")
+value = 3
+cell = Vector2i(9, -6)
+
+[sub_resource type="Resource" id="Resource_pspa2"]
+script = ExtResource("5_uw04x")
+value = 5
+cell = Vector2i(-1, 8)
+
+[resource]
+script = ExtResource("6_f73iy")
+title = "Potence"
+grade = 6
+ore_patches = Array[ExtResource("5_uw04x")]([SubResource("Resource_g7x37"), SubResource("Resource_70sox"), SubResource("Resource_pspa2")])
+goals = Dictionary[int, int]({
+4: 5,
+9: 5,
+8: 5,
+125: 5,
+72: 5
+})
+buildable = Array[ExtResource("1_s47mu")]([ExtResource("2_k8xwd"), ExtResource("3_j5c6i"), ExtResource("4_square"), ExtResource("7_cube"), ExtResource("8_multiply")])
