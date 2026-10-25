@@ -143,6 +143,23 @@ func test_cut_stores_a_blueprint_and_removes_the_selection() -> void:
 	assert_eq(sim.buildings.size(), 1)
 
 
+func test_paste_places_the_blueprint_when_every_part_fits() -> void:
+	drag(&"conveyor", [Vector2i(-3, 6), Vector2i(-1, 6)] as Array[Vector2i])
+	select(Vector2i(-3, 6), Vector2i(-1, 6))
+	tool.copy()
+	tool.paste()
+	assert_true(tool.active_contexts().has(ActionButtonDef.Context.BLUEPRINT_TOOL))
+	tool.press(Vector2i(1, 1))
+	tool.release()
+	assert_eq(sim.buildings.size(), 4, "a paste over the mothership places nothing")
+	tool.press(Vector2i(-2, 8))
+	tool.release()
+	assert_eq(sim.buildings.size(), 7)
+	assert_false(tool.active_contexts().has(ActionButtonDef.Context.BLUEPRINT_TOOL))
+	tool.undo()
+	assert_eq(sim.buildings.size(), 4)
+
+
 func test_eraser_leaves_the_mothership() -> void:
 	tool.use_eraser()
 	tool.press(Vector2i(1, 1))

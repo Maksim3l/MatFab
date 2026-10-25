@@ -2,7 +2,7 @@ class_name BuildTool extends Node
 
 signal state_changed
 
-enum Mode { NONE, BUILD, ERASE, SELECT }
+enum Mode { NONE, BUILD, ERASE, SELECT, BLUEPRINT }
 
 @export var camera_rig: CameraRig
 
@@ -24,6 +24,8 @@ var erase_marks: Array[BuildingState] = []
 # Cells of the current selection; a zero size means nothing is selected.
 var selection := Rect2i()
 var clipboard: Blueprint
+# The blueprint being pasted, in its current rotation.
+var blueprint: Blueprint
 
 
 func show_sim(simulation: Simulation, buildable_defs: Array[BuildingDef]) -> void:
@@ -47,6 +49,7 @@ func select_def(def: BuildingDef) -> void:
 func drop_tool() -> void:
 	cancel_gesture()
 	tool_def = null
+	blueprint = null
 	mode = Mode.NONE
 	state_changed.emit()
 
@@ -96,6 +99,16 @@ func cut() -> void:
 	delete_selection()
 
 
+func paste() -> void:
+	if clipboard == null:
+		return
+	cancel_gesture()
+	tool_def = null
+	blueprint = clipboard
+	mode = Mode.BLUEPRINT
+	state_changed.emit()
+
+
 func use_eraser() -> void:
 	cancel_gesture()
 	tool_def = null
@@ -132,6 +145,10 @@ func active_contexts() -> Array[ActionButtonDef.Context]:
 		contexts.append(ActionButtonDef.Context.CONVEYOR_TOOL)
 	if has_selection():
 		contexts.append(ActionButtonDef.Context.SELECTION)
+	if mode == Mode.BLUEPRINT:
+		contexts.append(ActionButtonDef.Context.BLUEPRINT_TOOL)
+	if clipboard != null:
+		contexts.append(ActionButtonDef.Context.CLIPBOARD)
 	return contexts
 
 
@@ -144,6 +161,13 @@ func rotate_ccw() -> void:
 
 
 func rotate_tool(quarter_turns: int) -> void:
+	if mode == Mode.BLUEPRINT:
+		for turn in quarter_turns:
+			blueprint = blueprint.rotated_cw()
+		if gesture_active:
+			refresh_ghosts()
+		state_changed.emit()
+		return
 	if not has_tool():
 		return
 	rotations[tool_def.id] = posmod(tool_rotation() + quarter_turns, 4)
@@ -200,6 +224,9 @@ func release() -> void:
 	if mode == Mode.SELECT:
 		cancel_gesture()
 		state_changed.emit()
+		return
+	if mode == Mode.BLUEPRINT:
+		release_blueprint()
 		return
 	if drag_cells.size() == 1 and is_same_def_building(drag_cells[0]):
 		rotate_building(drag_cells[0])
@@ -264,6 +291,9 @@ func refresh_ghosts() -> void:
 		selection = Rect2i(drag_cells[0], Vector2i.ZERO).expand(drag_cells.back())
 		selection.size += Vector2i.ONE
 		return
+	if mode == Mode.BLUEPRINT:
+		ghosts = blueprint.placements_at(blueprint_origin_under(drag_cells.back()))
+		return
 	ghosts = placements_for(DragPath.lock_to_axis(drag_cells) if straight_line else drag_cells)
 
 
@@ -302,6 +332,21 @@ func commit(placements: Array[Placement]) -> void:
 				forget_or_remove(before, added, removed)
 			added.append(placement)
 	history.record(added, removed)
+
+
+# The ghost follows the finger with the blueprint centered under it, and places only when every part fits.
+func release_blueprint() -> void:
+	var origin := blueprint_origin_under(drag_cells.back())
+	var fits := blueprint.fits(sim, origin)
+	if fits:
+		commit(blueprint.placements_at(origin))
+	cancel_gesture()
+	if fits and not keep_placing:
+		drop_tool()
+
+
+func blueprint_origin_under(cell: Vector2i) -> Vector2i:
+	return cell - (blueprint.size - Vector2i.ONE) / 2
 
 
 # Every building under the cells, once each, the mothership excepted.

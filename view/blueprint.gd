@@ -48,6 +48,13 @@ func rotated_cw() -> Blueprint:
 	return turned
 
 
+func fits(sim: Simulation, origin: Vector2i) -> bool:
+	for placement in placements_at(origin):
+		if not sim.can_place(placement.def_id, placement.origin, placement.rotation):
+			return false
+	return true
+
+
 func placements_at(origin: Vector2i) -> Array[Placement]:
 	var placed: Array[Placement] = []
 	for part in parts:
