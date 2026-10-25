@@ -4,10 +4,10 @@ const FILL_COLOR := Color("3c4a63")
 const BORDER_COLOR := Color("8fa3c7")
 const SYMBOL_COLOR := Color.WHITE
 const SYMBOL_FONT_SIZE := 34
-const BELT_COLOR := Color("4a5160")
-const BELT_EDGE_COLOR := Color("2a2f38")
-const ARROW_COLOR := Color("c9d3e3")
-const BELT_WIDTH := 0.62
+
+const BELT_STRAIGHT := preload("res://assets/real/belt_gor_dol.png")
+const BELT_TURN_RIGHT := preload("res://assets/real/belt_zavoj_desno.png")
+const BELT_TURN_LEFT := preload("res://assets/real/belt_zavoj_levo.png")
 const PORT_COLOR := Color("f0c35a")
 
 var sim: Simulation
@@ -33,15 +33,15 @@ func _draw() -> void:
 
 func draw_placeholder(def: BuildingDef, origin: Vector2i, rotation: int, alpha: float, tint := Color.WHITE) -> void:
 	var size := Ports.rotated_size(def.size, rotation)
-	var rect := Grid.cells_rect(origin, size).grow(-4)
 	if def.sprite != null:
-		draw_texture_rect(def.sprite, rect, false, Color(tint, alpha))
-		return
-	draw_rect(rect, FILL_COLOR * tint * Color(1, 1, 1, alpha))
-	draw_rect(rect, BORDER_COLOR * tint * Color(1, 1, 1, alpha), false, 3.0)
-	var font_size := SYMBOL_FONT_SIZE * mini(size.x, size.y)
-	var baseline := rect.position + Vector2(0, rect.size.y * 0.5 + font_size * 0.35)
-	draw_string(ThemeDB.fallback_font, baseline, def.symbol, HORIZONTAL_ALIGNMENT_CENTER, rect.size.x, font_size, Color(SYMBOL_COLOR, alpha))
+		draw_sprite(def, Grid.cells_rect(origin, size).get_center(), rotation, Color(tint, alpha))
+	else:
+		var rect := Grid.cells_rect(origin, size).grow(-4)
+		draw_rect(rect, FILL_COLOR * tint * Color(1, 1, 1, alpha))
+		draw_rect(rect, BORDER_COLOR * tint * Color(1, 1, 1, alpha), false, 3.0)
+		var font_size := SYMBOL_FONT_SIZE * mini(size.x, size.y)
+		var baseline := rect.position + Vector2(0, rect.size.y * 0.5 + font_size * 0.35)
+		draw_string(ThemeDB.fallback_font, baseline, def.symbol, HORIZONTAL_ALIGNMENT_CENTER, rect.size.x, font_size, Color(SYMBOL_COLOR, alpha))
 	var probe := BuildingState.new(def, origin, rotation)
 	for port in def.inputs:
 		if port.source == PortDef.Source.NEIGHBOR:
@@ -61,17 +61,30 @@ func draw_port_mark(cell: Vector2i, side: int, outward: bool, alpha: float) -> v
 	draw_colored_polygon(PackedVector2Array([base + across, base - across, base + depth]), Color(PORT_COLOR, alpha))
 
 
+func draw_sprite(def: BuildingDef, center: Vector2, rotation: int, color: Color) -> void:
+	var footprint := Vector2(def.size * Grid.CELL_SIZE)
+	if def.sprite_turns % 2 == 1:
+		footprint = Vector2(footprint.y, footprint.x)
+	var texture_size := def.sprite.get_size()
+	var fit := minf(footprint.x / texture_size.x, footprint.y / texture_size.y)
+	draw_turned_texture(def.sprite, center, texture_size * fit, rotation + def.sprite_turns, color)
+
+
+func draw_turned_texture(texture: Texture2D, center: Vector2, size: Vector2, quarter_turns: int, color: Color) -> void:
+	draw_set_transform(center, quarter_turns * PI / 2.0)
+	draw_texture_rect(texture, Rect2(-size / 2.0, size), false, color)
+	draw_set_transform(Vector2.ZERO)
+
+
 func draw_conveyor(cell: Vector2i, input_side: int, front_side: int, alpha: float, tint := Color.WHITE) -> void:
-	var center := Grid.cell_center(cell)
-	var path := PackedVector2Array([
-		center + ConveyorPath.edge_point(input_side) * Grid.CELL_SIZE,
-		center,
-		center + ConveyorPath.edge_point(front_side) * Grid.CELL_SIZE,
-	])
-	draw_polyline(path, BELT_EDGE_COLOR * tint * Color(1, 1, 1, alpha), Grid.CELL_SIZE * (BELT_WIDTH + 0.08), false)
-	draw_polyline(path, BELT_COLOR * tint * Color(1, 1, 1, alpha), Grid.CELL_SIZE * BELT_WIDTH, false)
-	var direction := Vector2(Ports.direction(front_side))
-	var across := direction.orthogonal() * Grid.CELL_SIZE * 0.16
-	var tip := center + direction * Grid.CELL_SIZE * 0.3
-	var back := tip - direction * Grid.CELL_SIZE * 0.2
-	draw_polyline(PackedVector2Array([back + across, tip, back - across]), Color(ARROW_COLOR, alpha * 0.8), 4.0)
+	var texture := BELT_STRAIGHT
+	var art_front := PortDef.Side.UP
+	match posmod(input_side - front_side, 4):
+		1:
+			texture = BELT_TURN_RIGHT
+			art_front = PortDef.Side.RIGHT
+		3:
+			texture = BELT_TURN_LEFT
+			art_front = PortDef.Side.LEFT
+	var size := Vector2.ONE * Grid.CELL_SIZE
+	draw_turned_texture(texture, Grid.cell_center(cell), size, front_side - art_front, Color(tint, alpha))

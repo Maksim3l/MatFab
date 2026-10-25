@@ -120,6 +120,7 @@ enum Behavior { PROCESSOR, CONVEYOR, MOTHERSHIP }
 @export var display_name := ""
 @export var symbol := ""
 @export var sprite: Texture2D
+@export_range(0, 3) var sprite_turns := 0
 @export var behavior := Behavior.PROCESSOR
 @export var size := Vector2i.ONE
 @export var inputs: Array[PortDef] = []
@@ -190,7 +191,7 @@ Commands:
 
 ## View
 
-The view reads sim state every frame. Conveyor numbers interpolate between ticks from `timer` and the clock fraction, and the view draws a conveyor fed from its side as a corner. Placeholders: a building without `sprite` is a rect with `symbol`, a number is a circle with its value, an ore cell is a tinted cell with its value. Ghosts show the tool with port arrows, red where `place` would fail.
+The view reads sim state every frame. Conveyor numbers interpolate between ticks from `timer` and the clock fraction, and the view draws a conveyor fed from its side as a corner. A building with `sprite` draws it fitted to its footprint and turned by `rotation + sprite_turns`, with port marks on top; conveyors draw the straight or turn belt art from `assets/real/`, and the ground tiles `background.png`. Placeholders: a building without `sprite` is a rect with `symbol`, a number is a circle with its value, an ore cell is a tinted cell with its value. Ghosts show the tool with port arrows, red where `place` would fail.
 
 ## Touch input
 
