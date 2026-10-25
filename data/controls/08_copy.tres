@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="ActionButtonDef" format=3]
+
+[ext_resource type="Script" path="res://data/schema/action_button_def.gd" id="1_1yfv5"]
+
+[resource]
+script = ExtResource("1_1yfv5")
+label = "Kopiraj"
+shown_with = Array[int]([4])
+command = &"copy"
