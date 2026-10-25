@@ -1,5 +1,6 @@
 [gd_resource type="Resource" script_class="BuildingDef" format=3]
 
+[ext_resource type="Texture2D" uid="uid://dsd3yte08tfd3" path="res://assets/real/sestevalnik.png" id="3_sprite"]
 [ext_resource type="Script" path="res://data/schema/port_def.gd" id="1_3sbdj"]
 [ext_resource type="Script" path="res://data/schema/building_def.gd" id="2_vk1u4"]
 
@@ -17,6 +18,7 @@ side = 0
 [resource]
 script = ExtResource("2_vk1u4")
 display_name = "Seštevalnik"
+sprite = ExtResource("3_sprite")
 symbol = "+"
 size = Vector2i(2, 1)
 inputs = Array[ExtResource("1_3sbdj")]([SubResource("Resource_lloll"), SubResource("Resource_rno3i")])
