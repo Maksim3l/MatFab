@@ -1,39 +1,37 @@
 [gd_resource type="Resource" script_class="LevelDef" format=3]
 
-[ext_resource type="Script" uid="uid://c1gppjsjj1ahr" path="res://data/schema/building_def.gd" id="1_s47mu"]
-[ext_resource type="Resource" path="res://data/blocks/conveyor.tres" id="2_k8xwd"]
-[ext_resource type="Resource" path="res://data/blocks/miner.tres" id="3_j5c6i"]
-[ext_resource type="Resource" path="res://data/blocks/square.tres" id="4_square"]
-[ext_resource type="Script" uid="uid://dnrm7gq8lwchd" path="res://data/schema/ore_patch.gd" id="5_uw04x"]
-[ext_resource type="Script" uid="uid://cncfnd32ethkw" path="res://data/schema/level_def.gd" id="6_f73iy"]
-[ext_resource type="Resource" path="res://data/blocks/cube.tres" id="7_cube"]
-[ext_resource type="Resource" path="res://data/blocks/multiply.tres" id="8_multiply"]
+[ext_resource type="Script" path="res://data/schema/level_def.gd" id="1_level"]
+[ext_resource type="Script" path="res://data/schema/ore_patch.gd" id="2_ore"]
+[ext_resource type="Script" path="res://data/schema/building_def.gd" id="3_building"]
+[ext_resource type="Resource" path="res://data/blocks/conveyor.tres" id="4_conveyor"]
+[ext_resource type="Resource" path="res://data/blocks/miner.tres" id="5_miner"]
+[ext_resource type="Resource" path="res://data/blocks/divide.tres" id="6_divide"]
 
-[sub_resource type="Resource" id="Resource_g7x37"]
-script = ExtResource("5_uw04x")
-value = 2
+[sub_resource type="Resource" id="Resource_ore0"]
+script = ExtResource("2_ore")
+value = 24
 cell = Vector2i(-10, -6)
 
-[sub_resource type="Resource" id="Resource_70sox"]
-script = ExtResource("5_uw04x")
-value = 3
+[sub_resource type="Resource" id="Resource_ore1"]
+script = ExtResource("2_ore")
+value = 2
 cell = Vector2i(9, -6)
 
-[sub_resource type="Resource" id="Resource_pspa2"]
-script = ExtResource("5_uw04x")
-value = 5
+[sub_resource type="Resource" id="Resource_ore2"]
+script = ExtResource("2_ore")
+value = 3
 cell = Vector2i(-1, 8)
 
 [resource]
-script = ExtResource("6_f73iy")
-title = "Potence"
+script = ExtResource("1_level")
+title = "Deljenje"
 grade = 6
-ore_patches = Array[ExtResource("5_uw04x")]([SubResource("Resource_g7x37"), SubResource("Resource_70sox"), SubResource("Resource_pspa2")])
+ore_patches = Array[ExtResource("2_ore")]([SubResource("Resource_ore0"), SubResource("Resource_ore1"), SubResource("Resource_ore2")])
 goals = Dictionary[int, int]({
-4: 5,
-9: 5,
+12: 5,
 8: 5,
-125: 5,
-72: 5
+6: 5,
+4: 5,
+1: 5
 })
-buildable = Array[ExtResource("1_s47mu")]([ExtResource("2_k8xwd"), ExtResource("3_j5c6i"), ExtResource("4_square"), ExtResource("7_cube"), ExtResource("8_multiply")])
+buildable = Array[ExtResource("3_building")]([ExtResource("4_conveyor"), ExtResource("5_miner"), ExtResource("6_divide")])
