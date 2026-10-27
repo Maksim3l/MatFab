@@ -4,6 +4,8 @@ signal state_changed
 
 enum Mode { NONE, BUILD, ERASE, SELECT, BLUEPRINT }
 
+const SHORTCUT_PREFIX := "build_"
+
 @export var camera_rig: CameraRig
 
 var sim: Simulation
@@ -26,6 +28,53 @@ var selection := Rect2i()
 var clipboard: Blueprint
 # The blueprint being pasted, in its current rotation.
 var blueprint: Blueprint
+var _shortcut_calls: Dictionary[StringName, Callable] = {}
+
+
+# Every Input Map action named build_<function> calls that function; a trailing number becomes its argument.
+func _ready() -> void:
+	for action in InputMap.get_actions():
+		if String(action).begins_with(SHORTCUT_PREFIX):
+			_shortcut_calls[action] = _call_for(String(action).trim_prefix(SHORTCUT_PREFIX))
+
+
+func _shortcut_input(event: InputEvent) -> void:
+	if sim == null:
+		return
+	for action in _shortcut_calls:
+		# exact_match: with false, Shift+R also fires build_rotate_cw.
+		if event.is_action_pressed(action, false, true):
+			get_viewport().set_input_as_handled()
+			_shortcut_calls[action].call()
+			return
+
+
+func _call_for(shortcut: String) -> Callable:
+	var head_and_number := shortcut.rsplit("_", true, 1)
+	var has_number := head_and_number.size() == 2 and head_and_number[1].is_valid_int()
+	var function_name := head_and_number[0] if has_number else shortcut
+	if not has_method(function_name):
+		push_error("Input Map action build_%s has no function %s in build_tool.gd" % [shortcut, function_name])
+	var function_call := Callable(self, function_name)
+	return function_call.bind(head_and_number[1].to_int()) if has_number else function_call
+
+
+# Shift held on a keyboard counts as keep_placing, Ctrl held as straight_line.
+func places_multiple() -> bool:
+	return keep_placing or Input.is_action_pressed(&"hold_place_multiple")
+
+
+func keeps_straight_line() -> bool:
+	return straight_line or Input.is_action_pressed(&"hold_straight_line")
+
+
+func pipette() -> void:
+	var pointer := get_viewport().get_mouse_position()
+	pipette_at(Grid.world_to_cell(camera_rig.screen_to_world(pointer)))
+
+
+func flip_conveyors() -> void:
+	set_toggle(&"conveyors_flipped", not conveyors_flipped)
 
 
 func show_sim(simulation: Simulation, buildable_defs: Array[BuildingDef]) -> void:
@@ -75,13 +124,11 @@ func selected_buildings() -> Array[BuildingState]:
 	for y in range(selection.position.y, selection.end.y):
 		for x in range(selection.position.x, selection.end.x):
 			cells.append(Vector2i(x, y))
-	return buildings_under(cells)
+	return RecordedEdits.buildings_under(sim, cells)
 
 
 func delete_selection() -> void:
-	erase_marks = selected_buildings()
-	erase_marked()
-	erase_marks.clear()
+	RecordedEdits.remove_all(sim, history, selected_buildings())
 	clear_selection()
 
 
@@ -178,7 +225,8 @@ func rotate_tool(quarter_turns: int) -> void:
 
 func center_camera() -> void:
 	var mothership := sim.building_at(Vector2i.ZERO)
-	camera_rig.center_on(Grid.cells_rect(mothership.origin, mothership.size()).get_center())
+	camera_rig.home = Grid.cells_rect(mothership.origin, mothership.size()).get_center()
+	camera_rig.center_on(camera_rig.home)
 	state_changed.emit()
 
 
@@ -218,7 +266,7 @@ func release() -> void:
 	if not gesture_active:
 		return
 	if mode == Mode.ERASE:
-		erase_marked()
+		RecordedEdits.remove_all(sim, history, erase_marks)
 		cancel_gesture()
 		return
 	if mode == Mode.SELECT:
@@ -232,11 +280,11 @@ func release() -> void:
 		rotate_building(drag_cells[0])
 		cancel_gesture()
 		return
-	commit(ghosts)
+	RecordedEdits.place_all(sim, history, ghosts)
 	if ghosts.size() > 0:
 		rotations[tool_def.id] = ghosts.back().rotation
 	cancel_gesture()
-	if not (keep_placing or tool_def.keep_selected):
+	if not (places_multiple() or tool_def.keep_selected):
 		drop_tool()
 
 
@@ -248,7 +296,7 @@ func is_same_def_building(cell: Vector2i) -> bool:
 # A tap on a building of the tool's def turns it a quarter clockwise in place, when the turned block fits.
 func rotate_building(cell: Vector2i) -> void:
 	var building := sim.building_at(cell)
-	var before := placement_of(building)
+	var before := RecordedEdits.placement_of(building)
 	var turned := Placement.new(before.def_id, before.origin, posmod(before.rotation + 1, 4))
 	if building.def.behavior != BuildingDef.Behavior.CONVEYOR:
 		sim.remove(cell)
@@ -258,10 +306,6 @@ func rotate_building(cell: Vector2i) -> void:
 	history.record([turned] as Array[Placement], [before] as Array[Placement])
 	rotations[turned.def_id] = turned.rotation
 	state_changed.emit()
-
-
-static func placement_of(building: BuildingState) -> Placement:
-	return Placement.new(building.def.id, building.origin, building.rotation)
 
 
 func undo() -> void:
@@ -285,7 +329,7 @@ func cancel_gesture() -> void:
 
 func refresh_ghosts() -> void:
 	if mode == Mode.ERASE:
-		erase_marks = buildings_under(drag_cells)
+		erase_marks = RecordedEdits.buildings_under(sim, drag_cells)
 		return
 	if mode == Mode.SELECT:
 		selection = Rect2i(drag_cells[0], Vector2i.ZERO).expand(drag_cells.back())
@@ -294,7 +338,7 @@ func refresh_ghosts() -> void:
 	if mode == Mode.BLUEPRINT:
 		ghosts = blueprint.placements_at(blueprint_origin_under(drag_cells.back()))
 		return
-	ghosts = placements_for(DragPath.lock_to_axis(drag_cells) if straight_line else drag_cells)
+	ghosts = placements_for(DragPath.lock_to_axis(drag_cells) if keeps_straight_line() else drag_cells)
 
 
 func placements_for(cells: Array[Vector2i]) -> Array[Placement]:
@@ -318,60 +362,16 @@ func ghost_fits(ghost: Placement) -> bool:
 	return sim.can_place(ghost.def_id, ghost.origin, ghost.rotation)
 
 
-# Placements that do not fit are skipped, so a miner dragged across an ore patch fills only the ore.
-# The whole gesture is one undo step; a conveyor it replaced counts as removed.
-func commit(placements: Array[Placement]) -> void:
-	var added: Array[Placement] = []
-	var removed: Array[Placement] = []
-	for placement in placements:
-		var existing := sim.building_at(placement.origin)
-		var replaced := existing != null and sim.replaces(sim.defs[placement.def_id], existing)
-		var before := placement_of(existing) if replaced else null
-		if sim.place(placement.def_id, placement.origin, placement.rotation):
-			if before != null:
-				forget_or_remove(before, added, removed)
-			added.append(placement)
-	history.record(added, removed)
-
-
 # The ghost follows the finger with the blueprint centered under it, and places only when every part fits.
 func release_blueprint() -> void:
 	var origin := blueprint_origin_under(drag_cells.back())
 	var fits := blueprint.fits(sim, origin)
 	if fits:
-		commit(blueprint.placements_at(origin))
+		RecordedEdits.place_all(sim, history, blueprint.placements_at(origin))
 	cancel_gesture()
-	if fits and not keep_placing:
+	if fits and not places_multiple():
 		drop_tool()
 
 
 func blueprint_origin_under(cell: Vector2i) -> Vector2i:
 	return cell - (blueprint.size - Vector2i.ONE) / 2
-
-
-# Every building under the cells, once each, the mothership excepted.
-func buildings_under(cells: Array[Vector2i]) -> Array[BuildingState]:
-	var found: Array[BuildingState] = []
-	for cell in cells:
-		var building := sim.building_at(cell)
-		if building != null and building.def.behavior != BuildingDef.Behavior.MOTHERSHIP and not found.has(building):
-			found.append(building)
-	return found
-
-
-# Removing the marked buildings is one undo step.
-func erase_marked() -> void:
-	var removed: Array[Placement] = []
-	for building in erase_marks:
-		if sim.remove(building.origin):
-			removed.append(placement_of(building))
-	history.record([] as Array[Placement], removed)
-
-
-# A building this same gesture added and then replaced was never there before the gesture.
-static func forget_or_remove(before: Placement, added: Array[Placement], removed: Array[Placement]) -> void:
-	for i in added.size():
-		if added[i].equals(before):
-			added.remove_at(i)
-			return
-	removed.append(before)

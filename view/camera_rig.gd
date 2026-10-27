@@ -2,6 +2,21 @@ class_name CameraRig extends Camera2D
 
 const MIN_ZOOM := 0.35
 const MAX_ZOOM := 2.5
+const KEY_PAN_SPEED := 900.0
+
+# Where camera_center returns to.
+var home := Vector2.ZERO
+
+
+func _process(delta: float) -> void:
+	var pan := Input.get_vector(&"camera_pan_left", &"camera_pan_right", &"camera_pan_up", &"camera_pan_down")
+	position += pan * KEY_PAN_SPEED * delta / zoom_level()
+
+
+func _unhandled_key_input(event: InputEvent) -> void:
+	if event.is_action_pressed(&"camera_center"):
+		center_on(home)
+		get_viewport().set_input_as_handled()
 
 
 func zoom_level() -> float:
