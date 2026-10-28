@@ -110,6 +110,56 @@ func test_eraser_removes_buildings_along_the_path_as_one_gesture() -> void:
 	assert_eq(layout(), empty)
 
 
+func select(from: Vector2i, to: Vector2i) -> void:
+	tool.use_selector()
+	tool.press(from)
+	tool.drag_to(to)
+	tool.release()
+
+
+func test_selection_shows_delete_copy_and_cut() -> void:
+	tap(&"miner", Vector2i(6, 3))
+	select(Vector2i(5, 2), Vector2i(7, 4))
+	assert_eq(tool.selection, Rect2i(Vector2i(5, 2), Vector2i(3, 3)))
+	assert_true(tool.active_contexts().has(ActionButtonDef.Context.SELECTION))
+
+
+func test_delete_selection_removes_all_but_the_mothership_as_one_step() -> void:
+	drag(&"conveyor", [Vector2i(-3, 1), Vector2i(-1, 1)] as Array[Vector2i])
+	var built := layout()
+	select(Vector2i(-4, -1), Vector2i(4, 4))
+	tool.delete_selection()
+	assert_eq(sim.buildings.size(), 1)
+	assert_false(tool.has_selection())
+	tool.undo()
+	assert_eq(layout(), built)
+
+
+func test_cut_stores_a_blueprint_and_removes_the_selection() -> void:
+	drag(&"conveyor", [Vector2i(-3, 6), Vector2i(-1, 6)] as Array[Vector2i])
+	select(Vector2i(-3, 6), Vector2i(-1, 6))
+	tool.cut()
+	assert_eq(tool.clipboard.parts.size(), 3)
+	assert_eq(sim.buildings.size(), 1)
+
+
+func test_paste_places_the_blueprint_when_every_part_fits() -> void:
+	drag(&"conveyor", [Vector2i(-3, 6), Vector2i(-1, 6)] as Array[Vector2i])
+	select(Vector2i(-3, 6), Vector2i(-1, 6))
+	tool.copy()
+	tool.paste()
+	assert_true(tool.active_contexts().has(ActionButtonDef.Context.BLUEPRINT_TOOL))
+	tool.press(Vector2i(1, 1))
+	tool.release()
+	assert_eq(sim.buildings.size(), 4, "a paste over the mothership places nothing")
+	tool.press(Vector2i(-2, 8))
+	tool.release()
+	assert_eq(sim.buildings.size(), 7)
+	assert_false(tool.active_contexts().has(ActionButtonDef.Context.BLUEPRINT_TOOL))
+	tool.undo()
+	assert_eq(sim.buildings.size(), 4)
+
+
 func test_eraser_leaves_the_mothership() -> void:
 	tool.use_eraser()
 	tool.press(Vector2i(1, 1))

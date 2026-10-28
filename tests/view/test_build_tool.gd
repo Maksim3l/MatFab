@@ -50,6 +50,22 @@ func test_selecting_the_active_slot_drops_the_tool() -> void:
 	assert_false(tool.has_tool())
 
 
+func test_call_for_maps_a_trailing_number_to_the_argument() -> void:
+	var slot_call := tool._call_for("select_slot_3")
+	assert_eq(slot_call.get_method(), &"select_slot")
+	assert_eq(slot_call.get_bound_arguments(), [3])
+	var rotate_call := tool._call_for("rotate_cw")
+	assert_eq(rotate_call.get_method(), &"rotate_cw")
+	assert_eq(rotate_call.get_bound_arguments(), [])
+
+
+func test_every_build_action_has_a_function() -> void:
+	for action in InputMap.get_actions():
+		if String(action).begins_with(BuildTool.SHORTCUT_PREFIX):
+			var shortcut := String(action).trim_prefix(BuildTool.SHORTCUT_PREFIX)
+			assert_true(tool.has_method(tool._call_for(shortcut).get_method()), "action %s" % action)
+
+
 func test_each_def_keeps_its_own_last_rotation() -> void:
 	tool.select_def(Registry.buildings[&"conveyor"])
 	tool.rotate_cw()
