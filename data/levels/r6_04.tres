@@ -1,0 +1,37 @@
+[gd_resource type="Resource" script_class="LevelDef" format=3]
+
+[ext_resource type="Script" path="res://data/schema/level_def.gd" id="1_level"]
+[ext_resource type="Script" path="res://data/schema/ore_patch.gd" id="2_ore"]
+[ext_resource type="Script" path="res://data/schema/building_def.gd" id="3_building"]
+[ext_resource type="Resource" path="res://data/blocks/conveyor.tres" id="4_conveyor"]
+[ext_resource type="Resource" path="res://data/blocks/miner.tres" id="5_miner"]
+[ext_resource type="Resource" path="res://data/blocks/divide.tres" id="6_divide"]
+
+[sub_resource type="Resource" id="Resource_ore0"]
+script = ExtResource("2_ore")
+value = 36
+cell = Vector2i(-10, -6)
+
+[sub_resource type="Resource" id="Resource_ore1"]
+script = ExtResource("2_ore")
+value = 2
+cell = Vector2i(9, -6)
+
+[sub_resource type="Resource" id="Resource_ore2"]
+script = ExtResource("2_ore")
+value = 3
+cell = Vector2i(-1, 8)
+
+[resource]
+script = ExtResource("1_level")
+title = "Delitelji"
+grade = 6
+ore_patches = Array[ExtResource("2_ore")]([SubResource("Resource_ore0"), SubResource("Resource_ore1"), SubResource("Resource_ore2")])
+goals = Dictionary[int, int]({
+18: 5,
+12: 5,
+9: 5,
+6: 5,
+4: 5
+})
+buildable = Array[ExtResource("3_building")]([ExtResource("4_conveyor"), ExtResource("5_miner"), ExtResource("6_divide")])
