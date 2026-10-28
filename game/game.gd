@@ -1,5 +1,7 @@
 extends Node
 
+signal level_completed
+
 const SCREENS: Dictionary[StringName, String] = {
 	&"main_menu": "res://ui/main_menu.tscn",
 	&"level_select": "res://ui/level_select.tscn",
@@ -14,7 +16,16 @@ var paused := false
 var completed_levels: Array[StringName] = []
 
 
+func _ready() -> void:
+	# Keeps running while the tree is paused, so back still reaches go_back.
+	process_mode = Node.PROCESS_MODE_ALWAYS
+
+
 func _physics_process(delta: float) -> void:
+	step_sim(delta)
+
+
+func step_sim(delta: float) -> void:
 	if sim == null or paused:
 		return
 	for step in clock.advance(delta):
@@ -43,21 +54,32 @@ func open_level(level_def: LevelDef) -> void:
 	sim = Simulation.from_level(level, Registry.buildings)
 	clock = SimClock.new()
 	paused = false
+	sim.tracker.completed.connect(complete_level)
 	open(&"play")
+
+
+func complete_level() -> void:
+	if not completed_levels.has(level.id):
+		completed_levels.append(level.id)
+	paused = true
+	level_completed.emit()
 
 
 func close_level() -> void:
 	level = null
 	sim = null
+	paused = false
 
 
-# Until the pause overlay exists, back on the play screen returns to the main menu.
+# On the play screen back is the screen's own: it drops the tool or selection first, then opens the pause menu.
 func go_back() -> void:
 	match current_screen():
 		&"main_menu":
 			get_tree().quit()
-		&"level_select", &"play":
+		&"level_select":
 			open(&"main_menu")
+		&"play":
+			get_tree().current_scene.go_back()
 
 
 func current_screen() -> StringName:
