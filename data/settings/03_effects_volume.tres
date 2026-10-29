@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="SettingDef" format=3]
+
+[ext_resource type="Script" path="res://data/schema/setting_def.gd" id="1_xu7km"]
+
+[resource]
+script = ExtResource("1_xu7km")
+label = "Zvočni učinki"
+choices = PackedStringArray()
+action = &"effects_volume"

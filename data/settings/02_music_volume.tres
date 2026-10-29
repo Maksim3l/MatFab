@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="SettingDef" format=3]
+
+[ext_resource type="Script" path="res://data/schema/setting_def.gd" id="1_tbc4u"]
+
+[resource]
+script = ExtResource("1_tbc4u")
+label = "Glasba"
+choices = PackedStringArray()
+action = &"music_volume"
