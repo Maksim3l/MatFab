@@ -15,11 +15,17 @@ var clock := SimClock.new()
 var paused := false
 # Filled from progress.sav by the save store; level select marks these levels.
 var completed_levels: Array[StringName] = []
+var last_played := &""
+var save_store := SaveStore.new()
+var autosave := AutosaveTimer.new()
 
 
 func _ready() -> void:
 	# Keeps running while the tree is paused, so back still reaches go_back.
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	var progress := save_store.load_progress()
+	completed_levels.assign(progress["completed"])
+	last_played = progress["last_played"]
 
 
 func _physics_process(delta: float) -> void:
@@ -31,11 +37,15 @@ func step_sim(delta: float) -> void:
 		return
 	for step in clock.advance(delta):
 		sim.step()
+	if autosave.advance(delta):
+		save_world()
 
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
 		go_back()
+	elif what == NOTIFICATION_APPLICATION_PAUSED:
+		save_world()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -54,20 +64,42 @@ func open(id: StringName) -> void:
 func open_level(level_def: LevelDef) -> void:
 	level = level_def
 	sim = Simulation.from_level(level, Registry.buildings)
+	if save_store.has_world(level.id):
+		save_store.load_world(level.id, sim)
 	clock = SimClock.new()
+	autosave.restart()
 	paused = false
 	sim.tracker.completed.connect(complete_level)
+	last_played = level.id
+	save_progress()
 	open(&"play")
+
+
+# The level played last, when it still exists; Nadaljuj opens it.
+func continue_level() -> LevelDef:
+	return Registry.levels.get(last_played)
 
 
 func complete_level() -> void:
 	if not completed_levels.has(level.id):
 		completed_levels.append(level.id)
 	paused = true
+	save_world()
+	save_progress()
 	level_completed.emit()
 
 
+func save_world() -> void:
+	if sim != null:
+		save_store.save_world(level.id, sim)
+
+
+func save_progress() -> void:
+	save_store.save_progress(completed_levels, last_played)
+
+
 func close_level() -> void:
+	save_world()
 	level = null
 	sim = null
 	paused = false
