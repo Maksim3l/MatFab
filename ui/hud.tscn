@@ -16,12 +16,14 @@ script = ExtResource("1_hud")
 layout_mode = 0
 offset_left = 16.0
 offset_top = 16.0
-offset_right = 200.0
-offset_bottom = 60.0
+offset_right = 16.0
+offset_bottom = 16.0
+mouse_filter = 2
 
 [node name="GoalList" type="VBoxContainer" parent="GoalPanel"]
 layout_mode = 2
 mouse_filter = 2
+theme_override_constants/separation = 6
 
 [node name="PauseButton" type="Button" parent="."]
 layout_mode = 1
@@ -37,16 +39,19 @@ focus_mode = 0
 theme_override_font_sizes/font_size = 24
 text = "Premor"
 
-[node name="Toolbar" type="HBoxContainer" parent="."]
+[node name="Toolbar" type="PanelContainer" parent="."]
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_top = -112.0
 offset_bottom = -16.0
 grow_horizontal = 2
 grow_vertical = 0
 mouse_filter = 2
-theme_override_constants/separation = 12
+
+[node name="Slots" type="HBoxContainer" parent="Toolbar"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 8

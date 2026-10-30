@@ -1,0 +1,38 @@
+[gd_resource type="Resource" script_class="LevelDef" format=3 uid="uid://otlequyyl65t"]
+
+[ext_resource type="Script" uid="uid://c1gppjsjj1ahr" path="res://data/schema/building_def.gd" id="1_8lqhm"]
+[ext_resource type="Resource" path="res://data/blocks/conveyor.tres" id="2_pmnq8"]
+[ext_resource type="Resource" path="res://data/blocks/miner.tres" id="3_03sb0"]
+[ext_resource type="Script" uid="uid://dnrm7gq8lwchd" path="res://data/schema/ore_patch.gd" id="4_2y85k"]
+[ext_resource type="Resource" uid="uid://s7f1s740vtx6" path="res://data/blocks/multiply.tres" id="4_nlo4o"]
+[ext_resource type="Script" uid="uid://cncfnd32ethkw" path="res://data/schema/level_def.gd" id="5_2s3mb"]
+
+[sub_resource type="Resource" id="Resource_g7x37"]
+script = ExtResource("4_2y85k")
+value = 2
+cell = Vector2i(-10, -6)
+
+[sub_resource type="Resource" id="Resource_70sox"]
+script = ExtResource("4_2y85k")
+value = 3
+cell = Vector2i(9, -6)
+
+[sub_resource type="Resource" id="Resource_pspa2"]
+script = ExtResource("4_2y85k")
+value = 5
+cell = Vector2i(-1, 8)
+metadata/_custom_type_script = "uid://dnrm7gq8lwchd"
+
+[resource]
+script = ExtResource("5_2s3mb")
+title = "Poštevanka"
+grade = 6
+ore_patches = Array[ExtResource("4_2y85k")]([SubResource("Resource_g7x37"), SubResource("Resource_70sox"), SubResource("Resource_pspa2")])
+goals = Dictionary[int, int]({
+4: 5,
+6: 5,
+10: 5,
+15: 5,
+30: 5
+})
+buildable = Array[ExtResource("1_8lqhm")]([ExtResource("2_pmnq8"), ExtResource("3_03sb0"), ExtResource("4_nlo4o")])

@@ -10,6 +10,7 @@
 [ext_resource type="Script" path="res://view/build_tool.gd" id="8_tool"]
 
 [node name="WorldView" type="Node2D"]
+texture_filter = 1
 script = ExtResource("1_world")
 
 [node name="GroundView" type="Node2D" parent="."]
