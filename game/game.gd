@@ -5,6 +5,7 @@ signal level_completed
 const SCREENS: Dictionary[StringName, String] = {
 	&"main_menu": "res://ui/main_menu.tscn",
 	&"level_select": "res://ui/level_select.tscn",
+	&"settings": "res://ui/settings_menu.tscn",
 	&"play": "res://game/play.tscn",
 }
 
@@ -43,8 +44,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		go_back()
 
 
+# Leaving to the menus ends the level; the settings screen keeps it, so back returns to it paused.
 func open(id: StringName) -> void:
-	if id != &"play":
+	if id == &"main_menu" or id == &"level_select":
 		close_level()
 	get_tree().change_scene_to_file(SCREENS[id])
 
@@ -78,7 +80,7 @@ func go_back() -> void:
 			get_tree().quit()
 		&"level_select":
 			open(&"main_menu")
-		&"play":
+		&"play", &"settings":
 			get_tree().current_scene.go_back()
 
 

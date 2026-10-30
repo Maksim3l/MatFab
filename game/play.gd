@@ -15,6 +15,7 @@ func _ready() -> void:
 	action_bar.show_tool(world_view.build_tool, Registry.controls_sorted)
 	pause_menu.resume_pressed.connect(resume)
 	pause_menu.main_menu_pressed.connect(Game.open.bind(&"main_menu"))
+	pause_menu.settings_pressed.connect(Game.open.bind(&"settings"))
 	level_complete.main_menu_pressed.connect(Game.open.bind(&"main_menu"))
 	Game.level_completed.connect(level_complete.show)
 	if Game.sim.tracker.is_complete():
