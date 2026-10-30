@@ -4,6 +4,8 @@
 [ext_resource type="PackedScene" path="res://view/world_view.tscn" id="2_world"]
 [ext_resource type="PackedScene" path="res://ui/hud.tscn" id="3_hud"]
 [ext_resource type="PackedScene" path="res://ui/action_bar.tscn" id="4_bar"]
+[ext_resource type="PackedScene" path="res://ui/pause_menu.tscn" id="5_pause"]
+[ext_resource type="PackedScene" path="res://ui/level_complete.tscn" id="6_complete"]
 
 [node name="Play" type="Node"]
 script = ExtResource("1_play")
@@ -15,3 +17,9 @@ script = ExtResource("1_play")
 [node name="Hud" parent="UiLayer" instance=ExtResource("3_hud")]
 
 [node name="ActionBar" parent="UiLayer" instance=ExtResource("4_bar")]
+
+[node name="PauseMenu" parent="UiLayer" instance=ExtResource("5_pause")]
+visible = false
+
+[node name="LevelComplete" parent="UiLayer" instance=ExtResource("6_complete")]
+visible = false

@@ -103,6 +103,18 @@ func drop_tool() -> void:
 	state_changed.emit()
 
 
+# Drops the tool or the selection; false when there was neither, which lets back open the pause menu.
+func cancel() -> bool:
+	if has_selection():
+		cancel_gesture()
+		clear_selection()
+		return true
+	if mode != Mode.NONE:
+		drop_tool()
+		return true
+	return false
+
+
 func use_selector() -> void:
 	cancel_gesture()
 	tool_def = null

@@ -1,5 +1,7 @@
 class_name Hud extends Control
 
+signal pause_pressed
+
 const GOAL_FONT_SIZE := 24
 const GOAL_ROW_WIDTH := 170
 const DONE_COLOR := Color("8fe388")
@@ -21,6 +23,11 @@ var slot_buttons: Dictionary[BuildingDef, Button] = {}
 @onready var goal_list: VBoxContainer = $GoalPanel/GoalList
 @onready var toolbar: PanelContainer = $Toolbar
 @onready var slot_list: HBoxContainer = $Toolbar/Slots
+@onready var pause_button: Button = $PauseButton
+
+
+func _ready() -> void:
+	pause_button.pressed.connect(pause_pressed.emit)
 
 
 func show_goals(goal_tracker: GoalTracker) -> void:
