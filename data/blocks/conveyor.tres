@@ -7,6 +7,7 @@
 [resource]
 script = ExtResource("2_wssu5")
 display_name = "Tekoči trak"
+description = "Nosi števila v smeri puščic. Povleci s prstom, da narišeš cel trak."
 sprite = ExtResource("3_sprite")
 behavior = 1
 duration = 0.25

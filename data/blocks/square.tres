@@ -13,6 +13,7 @@ side = 0
 [resource]
 script = ExtResource("2_vk1u4")
 display_name = "Kvadrat"
+description = "Število pomnoži s samim sabo: a² = a · a."
 symbol = "a²"
 inputs = Array[ExtResource("1_3sbdj")]([SubResource("Resource_lloll")])
 outputs = Array[ExtResource("1_3sbdj")]([SubResource("Resource_kufgm")])

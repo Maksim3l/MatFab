@@ -17,6 +17,7 @@ side = 0
 [resource]
 script = ExtResource("2_vk1u4")
 display_name = "Odštevalnik"
+description = "Od prvega števila odšteje drugo: a − b. Rezultat mora biti večji od 0."
 symbol = "-"
 size = Vector2i(2, 1)
 inputs = Array[ExtResource("1_3sbdj")]([SubResource("Resource_lloll"), SubResource("Resource_rno3i")])
