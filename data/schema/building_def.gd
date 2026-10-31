@@ -3,6 +3,8 @@ class_name BuildingDef extends Resource
 enum Behavior { PROCESSOR, CONVEYOR, MOTHERSHIP }
 
 @export var display_name := ""
+# What the block does, shown above the hotbar while it is the tool.
+@export_multiline var description := ""
 @export var symbol := ""
 @export var sprite: Texture2D
 @export_range(0, 3) var sprite_turns := 0

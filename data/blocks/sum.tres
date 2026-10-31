@@ -18,6 +18,7 @@ side = 0
 [resource]
 script = ExtResource("2_vk1u4")
 display_name = "Seštevalnik"
+description = "Sešteje dve števili: a + b."
 sprite = ExtResource("3_sprite")
 symbol = "+"
 size = Vector2i(2, 1)

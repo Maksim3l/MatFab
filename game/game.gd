@@ -14,6 +14,8 @@ var clock := SimClock.new()
 var paused := false
 # Filled from progress.sav by the save store; level select marks these levels.
 var completed_levels: Array[StringName] = []
+# Blocks whose description the HUD has already shown once; the Info window shows them again.
+var seen_block_info: Array[StringName] = []
 
 
 func _ready() -> void:

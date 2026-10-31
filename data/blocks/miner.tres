@@ -15,6 +15,7 @@ side = 0
 [resource]
 script = ExtResource("2_bykhy")
 display_name = "Rudar"
+description = "Postavi ga na rudo. Koplje število, na katerem stoji, in ga pošlje naprej."
 sprite = ExtResource("3_sprite")
 sprite_turns = 3
 symbol = "R"

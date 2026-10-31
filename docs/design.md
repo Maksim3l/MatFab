@@ -324,6 +324,27 @@ Adding a shortcut:
 1. Add `build_<name>` with its key in Project Settings > Input Map.
 2. Write `func <name>()` in `build_tool.gd`.
 
+## Tutorial and block info
+
+`LevelDef.tutorial` lists `TutorialStep`s that the play screen shows one at a time in `ui/tutorial_panel.tscn`, top center, with Naprej and Preskoči. It starts over from the first step every time the level opens.
+
+```gdscript
+class_name TutorialStep extends Resource
+
+enum Goal { READ, SELECT, PLACE, DELIVER }
+
+@export_multiline var text := ""
+@export var goal := Goal.READ
+@export var block: BuildingDef
+@export var amount := 1
+```
+
+- READ waits for Naprej; SELECT for `block` as the tool; PLACE for `amount` buildings of `block`; DELIVER for `amount` goal numbers in the mothership.
+- `game/tutorial.gd` checks the current step every frame and moves past every step already done, so a player who works ahead is not held back.
+- Only `r0_01` ("Kako se igra", grade 0, listed under "Navodila" before every grade) has steps. It has ore 1 and 2 under the mothership and the goals 3 and 4: two miners, a sum above them and a conveyor up into the mothership make 1 + 2, a second such row makes 2 + 2. The other levels have no tutorial; the Info window explains their blocks.
+- `BuildingDef.description` says what a block does. The first time a block becomes the tool in a session, the HUD shows `display_name: description` above the hotbar until the tool changes; `Game.seen_block_info` remembers which blocks it has shown.
+- The HUD Info button opens `ui/block_info_menu.tscn`: one row per block (the mothership, then the level's `buildable`) with its sprite or symbol, name and description. The sim pauses while it is open, and back closes it.
+
 ## Game state, menus, settings, saving
 
 **Game state**
