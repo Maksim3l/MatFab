@@ -36,3 +36,4 @@ func test_no_levels_give_no_groups() -> void:
 
 func test_grade_title() -> void:
 	assert_eq(LevelGroups.grade_title(1), "1. razred")
+	assert_eq(LevelGroups.grade_title(0), "Navodila")

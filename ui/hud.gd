@@ -1,6 +1,7 @@
 class_name Hud extends Control
 
 signal pause_pressed
+signal info_pressed
 
 const GOAL_FONT_SIZE := 24
 const GOAL_ROW_WIDTH := 170
@@ -18,16 +19,22 @@ var tracker: GoalTracker
 var goal_rows: Dictionary[int, PanelContainer] = {}
 var build_tool: BuildTool
 var slot_buttons: Dictionary[BuildingDef, Button] = {}
+# The block whose description is above the hotbar, or null.
+var info_def: BuildingDef
 
 @onready var goal_panel: PanelContainer = $GoalPanel
 @onready var goal_list: VBoxContainer = $GoalPanel/GoalList
 @onready var toolbar: PanelContainer = $Toolbar
 @onready var slot_list: HBoxContainer = $Toolbar/Slots
 @onready var pause_button: Button = $PauseButton
+@onready var info_button: Button = $InfoButton
+@onready var block_info: PanelContainer = $BlockInfo
+@onready var block_info_text: Label = $BlockInfo/Text
 
 
 func _ready() -> void:
 	pause_button.pressed.connect(pause_pressed.emit)
+	info_button.pressed.connect(info_pressed.emit)
 
 
 func show_goals(goal_tracker: GoalTracker) -> void:
@@ -149,3 +156,19 @@ func key_label(slot: int) -> Label:
 func refresh_toolbar() -> void:
 	for def in slot_buttons:
 		slot_buttons[def].set_pressed_no_signal(build_tool.tool_def == def)
+	refresh_block_info()
+
+
+# The first time a block becomes the tool, a line above the hotbar says what it does until the tool changes.
+# After that the Info window holds every description.
+func refresh_block_info() -> void:
+	var def := build_tool.tool_def
+	if def != info_def:
+		var first_time := def != null and def.description != "" and not Game.seen_block_info.has(def.id)
+		info_def = def if first_time else null
+		if first_time:
+			Game.seen_block_info.append(def.id)
+	block_info.visible = info_def != null
+	if block_info.visible:
+		BarStyle.style_panel(block_info)
+		block_info_text.text = "%s: %s" % [info_def.display_name, info_def.description]

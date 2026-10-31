@@ -18,6 +18,8 @@ var completed_levels: Array[StringName] = []
 var last_played := &""
 var save_store := SaveStore.new()
 var autosave := AutosaveTimer.new()
+# Blocks whose description the HUD has already shown once; the Info window shows them again.
+var seen_block_info: Array[StringName] = []
 
 
 func _ready() -> void:

@@ -12,5 +12,6 @@ static func by_grade(levels: Array[LevelDef]) -> Dictionary[int, Array]:
 	return groups
 
 
+# Grade 0 holds the tutorial level, which comes before every grade.
 static func grade_title(grade: int) -> String:
-	return "%d. razred" % grade
+	return "Navodila" if grade == 0 else "%d. razred" % grade

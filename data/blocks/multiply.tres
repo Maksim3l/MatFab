@@ -17,6 +17,7 @@ side = 0
 [resource]
 script = ExtResource("2_crtny")
 display_name = "Množilnik"
+description = "Zmnoži dve števili: a · b."
 symbol = "·"
 size = Vector2i(2, 1)
 inputs = Array[ExtResource("1_vo6fn")]([SubResource("Resource_lloll"), SubResource("Resource_rno3i")])

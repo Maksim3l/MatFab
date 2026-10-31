@@ -6,6 +6,7 @@
 [resource]
 script = ExtResource("2_o8opq")
 display_name = "Matična ladja"
+description = "Sprejme števila, ki so na seznamu nalog zgoraj levo."
 symbol = "M"
 behavior = 2
 size = Vector2i(4, 4)
