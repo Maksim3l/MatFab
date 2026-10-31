@@ -37,6 +37,14 @@ func test_level_def_defaults() -> void:
 	assert_eq(level.map_size, Vector2i(40, 30))
 	assert_eq(level.goals.size(), 0)
 	assert_eq(level.buildable.size(), 0)
+	assert_eq(level.tutorial.size(), 0)
+
+
+func test_tutorial_step_defaults() -> void:
+	var step := TutorialStep.new()
+	assert_eq(step.goal, TutorialStep.Goal.READ)
+	assert_null(step.block)
+	assert_eq(step.amount, 1)
 
 
 func test_setting_def_defaults() -> void:
