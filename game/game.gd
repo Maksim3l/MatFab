@@ -64,9 +64,21 @@ func open(id: StringName) -> void:
 
 
 func open_level(level_def: LevelDef) -> void:
+	load_level(level_def, true)
+	open(&"play")
+
+
+# Starts the open level again from its layout and overwrites its saved world, so a completed level can be replayed.
+func restart_level() -> void:
+	load_level(level, false)
+	save_world()
+	open(&"play")
+
+
+func load_level(level_def: LevelDef, from_save: bool) -> void:
 	level = level_def
 	sim = Simulation.from_level(level, Registry.buildings)
-	if save_store.has_world(level.id):
+	if from_save and save_store.has_world(level.id):
 		save_store.load_world(level.id, sim)
 	clock = SimClock.new()
 	autosave.restart()
@@ -74,7 +86,6 @@ func open_level(level_def: LevelDef) -> void:
 	sim.tracker.completed.connect(complete_level)
 	last_played = level.id
 	save_progress()
-	open(&"play")
 
 
 # The level played last, when it still exists; Nadaljuj opens it.

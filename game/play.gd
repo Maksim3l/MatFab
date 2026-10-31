@@ -21,6 +21,7 @@ func _ready() -> void:
 	pause_menu.main_menu_pressed.connect(Game.open.bind(&"main_menu"))
 	pause_menu.settings_pressed.connect(Game.open.bind(&"settings"))
 	level_complete.main_menu_pressed.connect(Game.open.bind(&"main_menu"))
+	level_complete.restart_pressed.connect(Game.restart_level)
 	Game.level_completed.connect(level_complete.show)
 	Game.level_completed.connect(tutorial_panel.hide)
 	# The tutorial starts over on every visit; Preskoči hides it.

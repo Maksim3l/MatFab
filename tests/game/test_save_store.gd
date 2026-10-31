@@ -85,3 +85,18 @@ func test_missing_progress_is_empty() -> void:
 	var progress := SaveStore.new("user://no_such_folder").load_progress()
 	assert_eq(progress["completed"].size(), 0)
 	assert_eq(progress["last_played"], &"")
+
+
+func test_restart_starts_from_the_layout_and_continue_loads_the_save() -> void:
+	var game_store := Game.save_store
+	Game.save_store = store
+	var sim := Simulation.from_level(level, Registry.buildings)
+	sim.place(&"miner", Vector2i(6, 3), 3)
+	store.save_world(level.id, sim)
+	Game.load_level(level, true)
+	assert_ne(Game.sim.building_at(Vector2i(6, 3)), null, "opening loads the saved world")
+	Game.load_level(level, false)
+	assert_eq(Game.sim.building_at(Vector2i(6, 3)), null, "restarting starts from the layout")
+	Game.save_store = game_store
+	Game.sim = null
+	Game.level = null
