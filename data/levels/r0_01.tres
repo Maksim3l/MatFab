@@ -1,0 +1,92 @@
+[gd_resource type="Resource" script_class="LevelDef" format=3]
+
+[ext_resource type="Script" path="res://data/schema/building_def.gd" id="1_building"]
+[ext_resource type="Resource" path="res://data/blocks/conveyor.tres" id="2_conveyor"]
+[ext_resource type="Resource" path="res://data/blocks/miner.tres" id="3_miner"]
+[ext_resource type="Resource" path="res://data/blocks/sum.tres" id="4_sum"]
+[ext_resource type="Script" path="res://data/schema/ore_patch.gd" id="5_ore"]
+[ext_resource type="Script" path="res://data/schema/tutorial_step.gd" id="6_step"]
+[ext_resource type="Script" path="res://data/schema/level_def.gd" id="7_level"]
+
+[sub_resource type="Resource" id="Resource_ore1"]
+script = ExtResource("5_ore")
+cell = Vector2i(-2, 9)
+
+[sub_resource type="Resource" id="Resource_ore2"]
+script = ExtResource("5_ore")
+value = 2
+cell = Vector2i(1, 9)
+
+[sub_resource type="Resource" id="TutorialStep_01"]
+script = ExtResource("6_step")
+text = "Dobrodošli v Matfabu! Matična ladja na sredini potrebuje števila. Katera števila in koliko jih potrebuje, vidiš na seznamu zgoraj levo. Tu potrebuje števili 3 in 4."
+
+[sub_resource type="Resource" id="TutorialStep_02"]
+script = ExtResource("6_step")
+text = "Pod ladjo sta rudi s številoma 1 in 2. Najprej potrebuješ rudarja. Tapni ga v vrstici spodaj ali pritisni tipko 2."
+goal = 1
+block = ExtResource("3_miner")
+
+[sub_resource type="Resource" id="TutorialStep_03"]
+script = ExtResource("6_step")
+text = "Postavi enega rudarja na rudo s številom 1 in drugega tik ob njem na rudo s številom 2. Rudar koplje število, na katerem stoji, in ga pošlje navzgor. Namig: če želiš rudarja zasukati, ga ponovno tapni v vrstici spodaj in nato pritisni Zasukaj."
+goal = 2
+block = ExtResource("3_miner")
+amount = 2
+
+[sub_resource type="Resource" id="TutorialStep_04"]
+script = ExtResource("6_step")
+text = "Ladja potrebuje 3, rudarja pa kopljeta 1 in 2. Števili moraš sešteti: 1 + 2 = 3."
+
+[sub_resource type="Resource" id="TutorialStep_05"]
+script = ExtResource("6_step")
+text = "Izberi seštevalnik. Tapni ga v vrstici spodaj ali pritisni tipko 3."
+goal = 1
+block = ExtResource("4_sum")
+
+[sub_resource type="Resource" id="TutorialStep_06"]
+script = ExtResource("6_step")
+text = "Seštevalnik postavi tik nad oba rudarja, da vsak rudar pošlje svoje število v en vhod seštevalnika."
+goal = 2
+block = ExtResource("4_sum")
+
+[sub_resource type="Resource" id="TutorialStep_07"]
+script = ExtResource("6_step")
+text = "Zdaj izberi tekoči trak. Tapni ga v vrstici spodaj ali pritisni tipko 1."
+goal = 1
+block = ExtResource("2_conveyor")
+
+[sub_resource type="Resource" id="TutorialStep_08"]
+script = ExtResource("6_step")
+text = "S prstom povleci trak od seštevalnika navzgor do matične ladje. Trak nosi števila v smeri, v katero vlečeš."
+goal = 2
+block = ExtResource("2_conveyor")
+amount = 3
+
+[sub_resource type="Resource" id="TutorialStep_09"]
+script = ExtResource("6_step")
+text = "Počakaj, da prvo število 3 prispe do ladje."
+goal = 3
+
+[sub_resource type="Resource" id="TutorialStep_10"]
+script = ExtResource("6_step")
+text = "Bravo! Ladja potrebuje še število 4, to je 2 + 2. Postavi dva rudarja drug ob drugem na rudo s številom 2, nad njiju drug seštevalnik, izhod pa s trakom poveži z ladjo."
+goal = 2
+block = ExtResource("4_sum")
+amount = 2
+
+[sub_resource type="Resource" id="TutorialStep_11"]
+script = ExtResource("6_step")
+text = "Odlično, zdaj znaš igrati! Zberi vse trojke in štirice. Če pozabiš, kaj dela kakšen blok, tapni Info zgoraj desno."
+
+[resource]
+script = ExtResource("7_level")
+title = "Kako se igra"
+grade = 0
+ore_patches = Array[ExtResource("5_ore")]([SubResource("Resource_ore1"), SubResource("Resource_ore2")])
+goals = Dictionary[int, int]({
+3: 3,
+4: 3
+})
+buildable = Array[ExtResource("1_building")]([ExtResource("2_conveyor"), ExtResource("3_miner"), ExtResource("4_sum")])
+tutorial = Array[ExtResource("6_step")]([SubResource("TutorialStep_01"), SubResource("TutorialStep_02"), SubResource("TutorialStep_03"), SubResource("TutorialStep_04"), SubResource("TutorialStep_05"), SubResource("TutorialStep_06"), SubResource("TutorialStep_07"), SubResource("TutorialStep_08"), SubResource("TutorialStep_09"), SubResource("TutorialStep_10"), SubResource("TutorialStep_11")])
