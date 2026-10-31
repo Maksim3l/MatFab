@@ -8,8 +8,10 @@ extends Control
 
 func _ready() -> void:
 	_breathe(title)
-	# The saving epic shows Nadaljuj once a last played level exists.
-	continue_button.hide()
+	var last := Game.continue_level()
+	continue_button.visible = last != null
+	if last != null:
+		continue_button.pressed.connect(Game.open_level.bind(last))
 	settings_button.disabled = not Game.SCREENS.has(&"settings")
 	play_button.pressed.connect(Game.open.bind(&"level_select"))
 	settings_button.pressed.connect(Game.open.bind(&"settings"))
