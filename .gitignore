@@ -28,3 +28,6 @@ mono_crash.*.json
 
 # The global ignore drops debug/ folders; this one holds the debug scene.
 !/debug/
+
+# Exported builds
+/build/
