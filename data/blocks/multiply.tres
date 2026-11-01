@@ -1,5 +1,6 @@
 [gd_resource type="Resource" script_class="BuildingDef" format=3 uid="uid://s7f1s740vtx6"]
 
+[ext_resource type="Texture2D" uid="uid://d2c5metfmx6so" path="res://assets/real/mnozilnik.png" id="3_sprite"]
 [ext_resource type="Script" uid="uid://b1pclrmumcx47" path="res://data/schema/port_def.gd" id="1_vo6fn"]
 [ext_resource type="Script" uid="uid://c1gppjsjj1ahr" path="res://data/schema/building_def.gd" id="2_crtny"]
 
@@ -17,6 +18,7 @@ side = 0
 [resource]
 script = ExtResource("2_crtny")
 display_name = "Množilnik"
+sprite = ExtResource("3_sprite")
 description = "Zmnoži dve števili: a · b."
 symbol = "·"
 size = Vector2i(2, 1)
