@@ -1,8 +1,10 @@
 [gd_resource type="Resource" script_class="ActionButtonDef" format=3]
 
+[ext_resource type="Texture2D" path="res://assets/placeholder/icon_select.png" id="1_2dbxb"]
 [ext_resource type="Script" path="res://data/schema/action_button_def.gd" id="1_ltdu2"]
 
 [resource]
 script = ExtResource("1_ltdu2")
-label = "Izberi"
+label = "Označi"
+icon = ExtResource("1_2dbxb")
 command = &"use_selector"
