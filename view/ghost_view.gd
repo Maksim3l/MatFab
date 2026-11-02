@@ -22,7 +22,7 @@ func _draw() -> void:
 		draw_rect(rect, SELECTION_BORDER, false, 3.0)
 	for building in build_tool.erase_marks:
 		draw_rect(Grid.cells_rect(building.origin, building.size()), ERASE_COLOR)
-	var ghosts := build_tool.ghosts
+	var ghosts := build_tool.shown_ghosts()
 	for i in ghosts.size():
 		var ghost := ghosts[i]
 		var tint := Color.WHITE if build_tool.ghost_fits(ghost) else BLOCKED_TINT

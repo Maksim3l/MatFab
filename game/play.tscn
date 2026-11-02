@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" path="res://ui/level_complete.tscn" id="6_complete"]
 [ext_resource type="PackedScene" path="res://ui/tutorial_panel.tscn" id="7_tutorial"]
 [ext_resource type="PackedScene" path="res://ui/block_info_menu.tscn" id="8_info"]
+[ext_resource type="PackedScene" path="res://ui/preview_buttons.tscn" id="9_preview"]
 
 [node name="Play" type="Node"]
 script = ExtResource("1_play")
@@ -25,6 +26,8 @@ visible = false
 
 [node name="BlockInfoMenu" parent="UiLayer" instance=ExtResource("8_info")]
 visible = false
+
+[node name="PreviewButtons" parent="UiLayer" instance=ExtResource("9_preview")]
 
 [node name="PauseMenu" parent="UiLayer" instance=ExtResource("5_pause")]
 visible = false

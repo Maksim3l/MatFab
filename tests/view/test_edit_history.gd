@@ -21,8 +21,14 @@ func layout() -> Array[String]:
 	return entries
 
 
+# Places one block the way a player does: a tap moves the preview there, a second tap places it.
 func tap(def_id: StringName, cell: Vector2i) -> void:
 	tool.select_def(Registry.buildings[def_id])
+	tap_once(cell)
+	tap_once(cell)
+
+
+func tap_once(cell: Vector2i) -> void:
 	tool.press(cell)
 	tool.release()
 
@@ -59,7 +65,8 @@ func test_sequence_of_place_drag_and_rotate_restores_every_step() -> void:
 	states.append(layout())
 	drag(&"conveyor", [Vector2i(5, 3), Vector2i(4, 3), Vector2i(4, 1)] as Array[Vector2i])
 	states.append(layout())
-	tap(&"conveyor", Vector2i(4, 1))
+	tool.select_def(Registry.buildings[&"conveyor"])
+	tap_once(Vector2i(4, 1))
 	states.append(layout())
 	for i in range(states.size() - 2, -1, -1):
 		tool.undo()
@@ -152,8 +159,9 @@ func test_paste_places_the_blueprint_when_every_part_fits() -> void:
 	tool.press(Vector2i(1, 1))
 	tool.release()
 	assert_eq(sim.buildings.size(), 4, "a paste over the mothership places nothing")
-	tool.press(Vector2i(-2, 8))
-	tool.release()
+	tap_once(Vector2i(-2, 8))
+	assert_eq(sim.buildings.size(), 4, "the first tap only moves the preview")
+	tap_once(Vector2i(-2, 8))
 	assert_eq(sim.buildings.size(), 7)
 	assert_false(tool.active_contexts().has(ActionButtonDef.Context.BLUEPRINT_TOOL))
 	tool.undo()
