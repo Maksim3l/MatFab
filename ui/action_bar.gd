@@ -28,6 +28,8 @@ func make_button(def: ActionButtonDef) -> Button:
 	var button := Button.new()
 	button.text = def.label
 	button.icon = def.icon
+	button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER if def.label == "" else HORIZONTAL_ALIGNMENT_LEFT
+	button.expand_icon = def.icon != null
 	button.focus_mode = Control.FOCUS_NONE
 	button.custom_minimum_size = BUTTON_SIZE
 	button.add_theme_font_size_override("font_size", FONT_SIZE)

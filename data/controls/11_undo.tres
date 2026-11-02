@@ -1,8 +1,9 @@
 [gd_resource type="Resource" script_class="ActionButtonDef" format=3]
 
 [ext_resource type="Script" path="res://data/schema/action_button_def.gd" id="1_08nyk"]
+[ext_resource type="Texture2D" path="res://assets/placeholder/icon_undo.png" id="1_ff4ou"]
 
 [resource]
 script = ExtResource("1_08nyk")
-label = "Razveljavi"
+icon = ExtResource("1_ff4ou")
 command = &"undo"
