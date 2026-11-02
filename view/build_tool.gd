@@ -234,11 +234,14 @@ func release() -> void:
 		drop_tool()
 
 
-# A tap on a block of the tool's def turns it; on the preview it places the preview; anywhere else it moves the preview there.
+# A tap on a block of the tool's def turns it. Otherwise a conveyor places at once, and other blocks place
+# when the tap is on the preview and move the preview there when it is not.
 func release_tap(cell: Vector2i) -> void:
 	cancel_gesture()
 	if is_same_def_building(cell):
 		rotate_building(cell)
+	elif is_conveyor_tool():
+		RecordedEdits.place_all(sim, history, placements_for([cell] as Array[Vector2i]))
 	elif preview_covers(cell):
 		place_preview()
 	else:

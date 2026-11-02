@@ -80,14 +80,15 @@ func is_conveyor_tool() -> bool:
 	return has_tool() and tool_def.behavior == BuildingDef.Behavior.CONVEYOR
 
 
+# Conveyors are drawn with the finger, so they place directly and have no preview.
 func has_preview() -> bool:
-	return mode == Mode.BUILD or mode == Mode.BLUEPRINT
+	return (mode == Mode.BUILD and not is_conveyor_tool()) or mode == Mode.BLUEPRINT
 
 
 func preview_placements() -> Array[Placement]:
 	if mode == Mode.BLUEPRINT:
 		return blueprint.placements_at(blueprint_origin_under(preview_cell))
-	if mode == Mode.BUILD:
+	if mode == Mode.BUILD and not is_conveyor_tool():
 		var single: Array[Placement] = [Placement.new(tool_def.id, origin_under(preview_cell, tool_rotation()), tool_rotation())]
 		return single
 	return []
@@ -110,7 +111,7 @@ func preview_fits() -> bool:
 
 # The ghosts to draw: the drag while one runs, otherwise the preview.
 func shown_ghosts() -> Array[Placement]:
-	if gesture_active and drag_cells.size() > 1:
+	if gesture_active and (drag_cells.size() > 1 or is_conveyor_tool()):
 		return ghosts
 	return preview_placements()
 

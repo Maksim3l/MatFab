@@ -21,11 +21,13 @@ func layout() -> Array[String]:
 	return entries
 
 
-# Places one block the way a player does: a tap moves the preview there, a second tap places it.
+# Places one block the way a player does: a conveyor places on a tap; other blocks take a tap to move
+# the preview there and a second tap to place it.
 func tap(def_id: StringName, cell: Vector2i) -> void:
 	tool.select_def(Registry.buildings[def_id])
 	tap_once(cell)
-	tap_once(cell)
+	if not tool.is_conveyor_tool():
+		tap_once(cell)
 
 
 func tap_once(cell: Vector2i) -> void:
