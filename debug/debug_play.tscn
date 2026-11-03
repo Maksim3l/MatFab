@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" path="res://view/world_view.tscn" id="2_world"]
 [ext_resource type="PackedScene" path="res://ui/hud.tscn" id="3_hud"]
 [ext_resource type="PackedScene" path="res://ui/action_bar.tscn" id="4_bar"]
+[ext_resource type="PackedScene" path="res://ui/preview_buttons.tscn" id="5_preview"]
 
 [node name="DebugPlay" type="Node"]
 script = ExtResource("1_debug")
@@ -15,3 +16,5 @@ script = ExtResource("1_debug")
 [node name="Hud" parent="UiLayer" instance=ExtResource("3_hud")]
 
 [node name="ActionBar" parent="UiLayer" instance=ExtResource("4_bar")]
+
+[node name="PreviewButtons" parent="UiLayer" instance=ExtResource("5_preview")]

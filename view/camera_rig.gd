@@ -37,5 +37,9 @@ func center_on(world_point: Vector2) -> void:
 	position = world_point
 
 
+func world_to_screen(world_point: Vector2) -> Vector2:
+	return (world_point - position) * zoom_level() + get_viewport_rect().size * 0.5
+
+
 func screen_to_world(screen_point: Vector2) -> Vector2:
 	return GestureMath.screen_to_world(position, zoom_level(), get_viewport_rect().size, screen_point)

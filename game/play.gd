@@ -3,6 +3,7 @@ extends Node
 @onready var world_view: WorldView = $WorldView
 @onready var hud: Hud = $UiLayer/Hud
 @onready var action_bar: ActionBar = $UiLayer/ActionBar
+@onready var preview_buttons: PreviewButtons = $UiLayer/PreviewButtons
 @onready var pause_menu: PauseMenu = $UiLayer/PauseMenu
 @onready var level_complete: LevelComplete = $UiLayer/LevelComplete
 @onready var tutorial_panel: TutorialPanel = $UiLayer/TutorialPanel
@@ -17,6 +18,7 @@ func _ready() -> void:
 	hud.info_pressed.connect(open_info)
 	block_info_menu.close_pressed.connect(close_info)
 	action_bar.show_tool(world_view.build_tool, Registry.controls_sorted)
+	preview_buttons.show_tool(world_view.build_tool, world_view.camera_rig)
 	pause_menu.resume_pressed.connect(resume)
 	pause_menu.main_menu_pressed.connect(Game.open.bind(&"main_menu"))
 	pause_menu.settings_pressed.connect(Game.open.bind(&"settings"))

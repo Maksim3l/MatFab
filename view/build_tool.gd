@@ -1,33 +1,7 @@
-class_name BuildTool extends Node
-
-signal state_changed
-
-enum Mode { NONE, BUILD, ERASE, SELECT, BLUEPRINT }
+class_name BuildTool extends ToolState
 
 const SHORTCUT_PREFIX := "build_"
 
-@export var camera_rig: CameraRig
-
-var sim: Simulation
-var buildable: Array[BuildingDef] = []
-var tool_def: BuildingDef
-# Each def keeps the rotation it was last placed with.
-var rotations: Dictionary[StringName, int] = {}
-var gesture_active := false
-var drag_cells: Array[Vector2i] = []
-var ghosts: Array[Placement] = []
-var keep_placing := false
-var straight_line := false
-var conveyors_flipped := false
-var history := EditHistory.new()
-var mode := Mode.NONE
-# Buildings the eraser path has passed over; release removes them.
-var erase_marks: Array[BuildingState] = []
-# Cells of the current selection; a zero size means nothing is selected.
-var selection := Rect2i()
-var clipboard: Blueprint
-# The blueprint being pasted, in its current rotation.
-var blueprint: Blueprint
 var _shortcut_calls: Dictionary[StringName, Callable] = {}
 
 
@@ -59,15 +33,6 @@ func _call_for(shortcut: String) -> Callable:
 	return function_call.bind(head_and_number[1].to_int()) if has_number else function_call
 
 
-# Shift held on a keyboard counts as keep_placing, Ctrl held as straight_line.
-func places_multiple() -> bool:
-	return keep_placing or Input.is_action_pressed(&"hold_place_multiple")
-
-
-func keeps_straight_line() -> bool:
-	return straight_line or Input.is_action_pressed(&"hold_straight_line")
-
-
 func pipette() -> void:
 	var pointer := get_viewport().get_mouse_position()
 	pipette_at(Grid.world_to_cell(camera_rig.screen_to_world(pointer)))
@@ -84,14 +49,11 @@ func show_sim(simulation: Simulation, buildable_defs: Array[BuildingDef]) -> voi
 	drop_tool()
 
 
-func has_tool() -> bool:
-	return tool_def != null
-
-
 func select_def(def: BuildingDef) -> void:
 	cancel_gesture()
 	tool_def = def
 	mode = Mode.BUILD
+	preview_cell = view_center_cell()
 	state_changed.emit()
 
 
@@ -122,21 +84,9 @@ func use_selector() -> void:
 	state_changed.emit()
 
 
-func has_selection() -> bool:
-	return selection.has_area()
-
-
 func clear_selection() -> void:
 	selection = Rect2i()
 	state_changed.emit()
-
-
-func selected_buildings() -> Array[BuildingState]:
-	var cells: Array[Vector2i] = []
-	for y in range(selection.position.y, selection.end.y):
-		for x in range(selection.position.x, selection.end.x):
-			cells.append(Vector2i(x, y))
-	return RecordedEdits.buildings_under(sim, cells)
 
 
 func delete_selection() -> void:
@@ -165,6 +115,7 @@ func paste() -> void:
 	tool_def = null
 	blueprint = clipboard
 	mode = Mode.BLUEPRINT
+	preview_cell = view_center_cell()
 	state_changed.emit()
 
 
@@ -194,21 +145,6 @@ func run_command(command: StringName) -> void:
 func set_toggle(property: StringName, on: bool) -> void:
 	set(property, on)
 	state_changed.emit()
-
-
-func active_contexts() -> Array[ActionButtonDef.Context]:
-	var contexts: Array[ActionButtonDef.Context] = [ActionButtonDef.Context.ALWAYS]
-	if has_tool():
-		contexts.append(ActionButtonDef.Context.BUILDING_TOOL)
-	if is_conveyor_tool():
-		contexts.append(ActionButtonDef.Context.CONVEYOR_TOOL)
-	if has_selection():
-		contexts.append(ActionButtonDef.Context.SELECTION)
-	if mode == Mode.BLUEPRINT:
-		contexts.append(ActionButtonDef.Context.BLUEPRINT_TOOL)
-	if clipboard != null:
-		contexts.append(ActionButtonDef.Context.CLIPBOARD)
-	return contexts
 
 
 func rotate_cw() -> void:
@@ -251,14 +187,6 @@ func pipette_at(cell: Vector2i) -> void:
 	select_def(sim.defs[picked.def_id])
 
 
-func tool_rotation() -> int:
-	return rotations.get(tool_def.id, 0)
-
-
-func is_conveyor_tool() -> bool:
-	return has_tool() and tool_def.behavior == BuildingDef.Behavior.CONVEYOR
-
-
 func press(cell: Vector2i) -> void:
 	if mode == Mode.NONE:
 		return
@@ -286,23 +214,50 @@ func release() -> void:
 		state_changed.emit()
 		return
 	if mode == Mode.BLUEPRINT:
-		release_blueprint()
+		if drag_cells.size() == 1 and preview_covers(drag_cells[0]):
+			cancel_gesture()
+			place_preview()
+		else:
+			preview_cell = drag_cells.back()
+			cancel_gesture()
+			state_changed.emit()
 		return
-	if drag_cells.size() == 1 and is_same_def_building(drag_cells[0]):
-		rotate_building(drag_cells[0])
-		cancel_gesture()
+	if drag_cells.size() == 1:
+		release_tap(drag_cells[0])
 		return
 	RecordedEdits.place_all(sim, history, ghosts)
 	if ghosts.size() > 0:
 		rotations[tool_def.id] = ghosts.back().rotation
+		preview_cell = drag_cells.back()
 	cancel_gesture()
 	if not (places_multiple() or tool_def.keep_selected):
 		drop_tool()
 
 
-func is_same_def_building(cell: Vector2i) -> bool:
-	var building := sim.building_at(cell)
-	return building != null and building.def == tool_def
+# A tap on a block of the tool's def turns it. Otherwise a conveyor places at once, and other blocks place
+# when the tap is on the preview and move the preview there when it is not.
+func release_tap(cell: Vector2i) -> void:
+	cancel_gesture()
+	if is_same_def_building(cell):
+		rotate_building(cell)
+	elif is_conveyor_tool():
+		RecordedEdits.place_all(sim, history, placements_for([cell] as Array[Vector2i]))
+	elif preview_covers(cell):
+		place_preview()
+	else:
+		preview_cell = cell
+		state_changed.emit()
+
+
+# Places the preview when every part of it fits; the tool then drops as after any other placement.
+func place_preview() -> void:
+	if not has_preview() or not preview_fits():
+		return
+	RecordedEdits.place_all(sim, history, preview_placements())
+	if not (places_multiple() or (has_tool() and tool_def.keep_selected)):
+		drop_tool()
+	else:
+		state_changed.emit()
 
 
 # A tap on a building of the tool's def turns it a quarter clockwise in place, when the turned block fits.
@@ -337,53 +292,3 @@ func cancel_gesture() -> void:
 	drag_cells.clear()
 	ghosts.clear()
 	erase_marks.clear()
-
-
-func refresh_ghosts() -> void:
-	if mode == Mode.ERASE:
-		erase_marks = RecordedEdits.buildings_under(sim, drag_cells)
-		return
-	if mode == Mode.SELECT:
-		selection = Rect2i(drag_cells[0], Vector2i.ZERO).expand(drag_cells.back())
-		selection.size += Vector2i.ONE
-		return
-	if mode == Mode.BLUEPRINT:
-		ghosts = blueprint.placements_at(blueprint_origin_under(drag_cells.back()))
-		return
-	ghosts = placements_for(DragPath.lock_to_axis(drag_cells) if keeps_straight_line() else drag_cells)
-
-
-func placements_for(cells: Array[Vector2i]) -> Array[Placement]:
-	if is_conveyor_tool():
-		return DragPath.conveyor_placements(tool_def.id, cells, tool_rotation(), conveyors_flipped)
-	var origins: Array[Vector2i] = []
-	for cell in cells:
-		origins.append(origin_under(cell, tool_rotation()))
-	var placements: Array[Placement] = []
-	for origin in DragPath.stepped_origins(origins, Ports.rotated_size(tool_def.size, tool_rotation())):
-		placements.append(Placement.new(tool_def.id, origin, tool_rotation()))
-	return placements
-
-
-# Origin that puts the block's middle cell under the finger.
-func origin_under(cell: Vector2i, rotation: int) -> Vector2i:
-	return cell - (Ports.rotated_size(tool_def.size, rotation) - Vector2i.ONE) / 2
-
-
-func ghost_fits(ghost: Placement) -> bool:
-	return sim.can_place(ghost.def_id, ghost.origin, ghost.rotation)
-
-
-# The ghost follows the finger with the blueprint centered under it, and places only when every part fits.
-func release_blueprint() -> void:
-	var origin := blueprint_origin_under(drag_cells.back())
-	var fits := blueprint.fits(sim, origin)
-	if fits:
-		RecordedEdits.place_all(sim, history, blueprint.placements_at(origin))
-	cancel_gesture()
-	if fits and not places_multiple():
-		drop_tool()
-
-
-func blueprint_origin_under(cell: Vector2i) -> Vector2i:
-	return cell - (blueprint.size - Vector2i.ONE) / 2
