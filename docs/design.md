@@ -55,36 +55,9 @@ class_name OrePatch extends Resource
 @export var size := Vector2i(3, 3)
 ```
 
-`Simulation.from_level(level)` places `mothership.tres` at cell (0, 0), fills the ore map from `ore_patches`, sets the map bounds from `map_size` centered on (0, 0), and creates a `GoalTracker`. Every cell in level data is relative to the mothership. The mothership accepts every number on every edge and calls `receive`, which ignores numbers outside `goals`:
+`Simulation.from_level(level)` places `mothership.tres` at cell (0, 0), fills the ore map from `ore_patches`, sets the map bounds from `map_size` centered on (0, 0), and creates a `GoalTracker`. Every cell in level data is relative to the mothership. The mothership accepts every number on every edge and calls `receive`. It asks for one goal at a time, in data order: the current goal is the first number in `goals` not yet met. Every number it receives goes into `received`, goal or not, and numbers stored before their goal comes up count as soon as it does, so nothing a player delivers is wasted. `sim/goal_tracker.gd` holds this as `current_goal()`, `progress(number)` (received, capped at the amount) and `is_complete()`, with the signals `counted`, `goal_changed` and `completed`.
 
-```gdscript
-class_name GoalTracker extends RefCounted
-
-signal counted(number: int, count: int)
-signal completed
-
-var goals: Dictionary[int, int]
-var received: Dictionary[int, int] = {}
-
-func _init(level_goals: Dictionary[int, int]) -> void:
-	goals = level_goals
-
-func receive(number: int) -> void:
-	if not goals.has(number) or is_complete():
-		return
-	received[number] = received.get(number, 0) + 1
-	counted.emit(number, received[number])
-	if is_complete():
-		completed.emit()
-
-func is_complete() -> bool:
-	for number in goals:
-		if received.get(number, 0) < goals[number]:
-			return false
-	return true
-```
-
-The HUD lists the goals in data order as the number and `received / amount`. Level select lists levels under their `grade` ("1. razred"), sorted by file name.
+The mothership draws its current goal as a large number with `progress / amount` under it. The HUD lists the goals in data order as the number and `received / amount`. Level select lists levels under their `grade` ("1. razred"), sorted by file name.
 
 `data/levels/r1_01.tres`:
 
