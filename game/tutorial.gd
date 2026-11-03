@@ -61,8 +61,10 @@ static func placed_count(sim: Simulation, def: BuildingDef) -> int:
 	return count
 
 
+# Only goal numbers count; the tracker also keeps every other number the mothership received.
 static func delivered_count(tracker: GoalTracker) -> int:
 	var count := 0
 	for number in tracker.received:
-		count += tracker.received[number]
+		if tracker.goals.has(number):
+			count += tracker.received[number]
 	return count
