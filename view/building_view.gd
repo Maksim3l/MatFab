@@ -9,6 +9,9 @@ const BELT_STRAIGHT := preload("res://assets/real/belt_gor_dol.png")
 const BELT_TURN_RIGHT := preload("res://assets/real/belt_zavoj_desno.png")
 const BELT_TURN_LEFT := preload("res://assets/real/belt_zavoj_levo.png")
 const PORT_COLOR := Color("f0c35a")
+const GOAL_RADIUS := 0.62
+const GOAL_FONT_SIZE := 72
+const GOAL_PROGRESS_FONT_SIZE := 34
 
 var sim: Simulation
 
@@ -27,6 +30,8 @@ func _draw() -> void:
 	for building in sim.buildings:
 		if building.def.behavior == BuildingDef.Behavior.CONVEYOR:
 			draw_conveyor(building.origin, ConveyorPath.input_side(sim, building), building.front_side(), 1.0)
+		elif building.def.behavior == BuildingDef.Behavior.MOTHERSHIP and sim.tracker != null and not sim.tracker.is_complete():
+			draw_mothership_goal(building)
 		else:
 			draw_placeholder(building.def, building.origin, building.rotation, 1.0)
 
@@ -88,3 +93,20 @@ func draw_conveyor(cell: Vector2i, input_side: int, front_side: int, alpha: floa
 			art_front = PortDef.Side.LEFT
 	var size := Vector2.ONE * Grid.CELL_SIZE
 	draw_turned_texture(texture, Grid.cell_center(cell), size, front_side - art_front, Color(tint, alpha))
+
+
+# The mothership shows the one number it asks for now, big, with how many of it have arrived.
+func draw_mothership_goal(mothership: BuildingState) -> void:
+	var rect := Grid.cells_rect(mothership.origin, mothership.size()).grow(-4)
+	draw_rect(rect, FILL_COLOR)
+	draw_rect(rect, BORDER_COLOR, false, 3.0)
+	var goal := sim.tracker.current_goal()
+	var center := rect.get_center() - Vector2(0, rect.size.y * 0.1)
+	var radius := GOAL_RADIUS * Grid.CELL_SIZE
+	draw_circle(center, radius + 3.0, Color(0, 0, 0, 0.55))
+	draw_circle(center, radius, ItemView.number_color(goal))
+	var font := ThemeDB.fallback_font
+	draw_string(font, center + Vector2(-radius, GOAL_FONT_SIZE * 0.35), str(goal), HORIZONTAL_ALIGNMENT_CENTER, radius * 2.0, GOAL_FONT_SIZE, SYMBOL_COLOR)
+	var progress := "%d / %d" % [sim.tracker.progress(goal), sim.tracker.goals[goal]]
+	var progress_baseline := Vector2(rect.position.x, rect.end.y - rect.size.y * 0.1)
+	draw_string(font, progress_baseline, progress, HORIZONTAL_ALIGNMENT_CENTER, rect.size.x, GOAL_PROGRESS_FONT_SIZE, SYMBOL_COLOR)
